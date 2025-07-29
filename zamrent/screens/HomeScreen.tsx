@@ -1,6 +1,11 @@
 
 import {Text, View, SafeAreaView, KeyboardAvoidingView, TouchableOpacity, StyleSheet, TextInput} from "react-native";
 import React, {useState, useEffect} from "react";
+import {Provider as PaperProvider, Menu, Button} from "react-native-paper"
+import RadioButtons from "../components/RadioButtons"
+import MyDropDownMenu from "../components/MyDropDownMenu";
+import FilterModal from "@/components/FilterModal";
+import * as Location from "expo-location";
 
 export default function HomeScreen(){
     const [location, setLocation] = useState('');
@@ -13,6 +18,36 @@ export default function HomeScreen(){
     const [filter, setFilter] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(''); 
+    const [filterVisible, setFilterVisible] = useState(false);
+
+    useEffect(() => {
+        if (filter === "near-me") {
+            (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setError('Permission to access location was denied');
+                return;
+            }
+
+            let locationData = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude, accuracy } = locationData.coords;
+
+            setLat(latitude);
+            setLon(longitude);
+
+            const label =
+                propertyType === "boardinghouse"
+                ? "Boarding houses near me"
+                : "Houses near me";
+
+            setLocation(label);
+
+            if (accuracy > 100) {
+                alert("Note: Your location accuracy is low. Consider enabling high accuracy mode.");
+                }
+                    })();
+                }
+        }, [filter, propertyType]);
 
     const HandleSearch = ()=>{
             console.log("This is what was entered in the input field", location);
@@ -21,6 +56,18 @@ export default function HomeScreen(){
     return(
         <KeyboardAvoidingView 
         style={styles.container}>
+            <FilterModal
+                visible={filterVisible}
+                onClose={() => setFilterVisible(false)}
+                price={price}
+                setPrice={setPrice}
+                bedrooms={bedrooms}
+                setBedrooms={setBedrooms}
+                bedspaces={bedspaces}
+                setBedspaces={setBedspaces}
+                propertyType={propertyType}
+            />
+
             <SafeAreaView style={{flex:1}}>
                 <View style={styles.inner}>
                     <View style={styles.topsection}>
@@ -29,11 +76,37 @@ export default function HomeScreen(){
                     </View>
                     
                     <View style={styles.downsection}>
-                        <TextInput style={styles.inputField} value={location} onChange={(e)=>setLocation(e.target.value)} placeholder="search location"/>
+                        <TextInput style={styles.inputField} value={location} onChangeText={setLocation} placeholder="search location"/>
                         
+                        <TouchableOpacity style={styles.button} onPress={() => setFilterVisible(true)}>
+                            <Text style={styles.button_text}>Filters</Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity style={styles.button} onPress={HandleSearch}>
                             <Text style={styles.button_text}>Search</Text>
                         </TouchableOpacity>
+
+                        
+                        <View style={styles.dropdownContainer}>
+                        <Button
+                            mode="outlined"
+                            onPress={() => setFilter("near-me")}
+                            style={{ marginBottom: 10 }}>
+                            Near Me
+                        </Button>
+
+                        <Button
+                            mode="outlined"
+                            onPress={() => setFilter("")}>
+                            Reset Filter
+                        </Button>
+                        </View>
+
+                        <PaperProvider>
+                            <RadioButtons
+                            propertyType={propertyType}
+                            setPropertyType={setPropertyType}/>
+                        </PaperProvider>
                     </View>
 
                 </View>
@@ -88,5 +161,8 @@ const styles = StyleSheet.create({
         color:"white",
         fontSize:26,
         fontWeight:"700",
+    },
+    dropdownContainer:{
+        
     },
 });
