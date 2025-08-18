@@ -1,32 +1,70 @@
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-import {Tabs} from"expo-router";
-import {Ionicons} from "@expo/vector-icons";
+export default function Layout() {
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "#2f95dc",
+        tabBarInactiveTintColor: "gray",
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="HomeScreen.tsx"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
 
-export default function Layout(){
-  return <Tabs
-  screenOptions={({ route }) => ({
-    tabBarIcon: ({ color, size }) => {
-      let iconName = 'alert-circle-outline';
+      <Tabs.Screen
+        name="SignInScreen"
+        options={{
+          title: "Sign In",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "log-in" : "log-in-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
 
-      console.log('Route ', route.name);;
+      <Tabs.Screen
+        name="SignUpScreen"
+        options={{
+          title: "Sign Up",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "person-add" : "person-add-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
 
-      if (route.name === '(tabs)/home') {
-        iconName = 'home-outline';
-      } else if (route.name === '(tabs)/sign-in') {
-        iconName = 'log-in-outline';
-      } else if (route.name === '(tabs)/sign-up') {
-        iconName = 'person-add-outline';
-      } else if (route.name === '(tabs)/profile') {
-        iconName = 'person-circle-outline';
-      }
-
-      return <Ionicons name={iconName} size={size} color={color} />;
-    },
-    tabBarActiveTintColor: '#2f95dc',
-    tabBarInactiveTintColor: 'gray',
-    headerShown: false,
-  })}
-
-/>
-
+      <Tabs.Screen
+        name="Profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "person-circle" : "person-circle-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tabs>
+  );
 }

@@ -2,7 +2,7 @@
 import {Text, View, SafeAreaView, KeyboardAvoidingView, TouchableOpacity, StyleSheet, TextInput} from "react-native";
 import React, {useState, useEffect} from "react";
 import {Provider as PaperProvider, Menu, Button} from "react-native-paper"
-import MyRadioButtons from "../components/RadioButtons";
+import RadioButtons from "../../components/RadioButtons"
 import FilterModal from "@/components/FilterModal";
 import * as Location from "expo-location";
 import {useRouter} from "expo-router"
@@ -10,7 +10,7 @@ import {useRouter} from "expo-router"
 export default function HomeScreen(){
     const [location, setLocation] = useState('');
     const [price, setPrice] = useState(0);
-    const [propertyType, setPropertyType] = useState('house');
+    const [property_type, setProperty_type] = useState('house');
     const [lat, setLat] = useState(null);
     const [lon, setLon] = useState(null);
     const [bedrooms, setBedrooms] = useState('');
@@ -41,7 +41,7 @@ export default function HomeScreen(){
             console.log("These are the coords: ",latitude, longitude);
 
             const label =
-                propertyType === "boardinghouse"
+                property_type === "boardinghouse"
                 ? "Boarding houses near me"
                 : "Houses near me";
 
@@ -52,7 +52,7 @@ export default function HomeScreen(){
                 }
                     })();
                 }
-        }, [filter, propertyType]);
+        }, [filter, property_type]);
 
         const HandleSearch = () => {
             if (!location && filter !== "near-me") {
@@ -62,21 +62,24 @@ export default function HomeScreen(){
 
             setLoading(true);
             setError("");
+            setLocation('');
 
             const queryObject = {
                 lat,
                 lon,
                 location,
-                propertyType:propertyType,
+                property_type:property_type,
                 ...(filter === "near-me"?{use_coordinate:true}:{}),
-                ...(propertyType === "house"?{bedrooms,price}:{}),
-                ...(propertyType === "boardinghouse"?{bedspaces,price}:{})
+                ...(property_type === "house"?{bedrooms,price}:{}),
+                ...(property_type === "boardinghouse"?{bedspaces,price}:{})
             };
 
             const queryParams = Object.entries(queryObject)
             .filter(([key, value])=> value !== null && value !=="" && value !== undefined)
             .map(([key, value])=> `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
             .join("&")
+
+            console.log("These are the params",queryParams);
 
             fetch(`${baseURL}/api/searchproperty?${queryParams}`, {
             method: "GET",
@@ -116,7 +119,7 @@ export default function HomeScreen(){
                 setBedrooms={setBedrooms}
                 bedspaces={bedspaces}
                 setBedspaces={setBedspaces}
-                propertyType={propertyType}
+                property_type={property_type}
             />
 
             <SafeAreaView style={{flex:1}}>
@@ -154,7 +157,7 @@ export default function HomeScreen(){
                         </View>
 
                         <PaperProvider>
-                            <MyRadioButtons
+                            <RadioButtons
                             propertyType={propertyType}
                             setPropertyType={setPropertyType}/>
                         </PaperProvider>
