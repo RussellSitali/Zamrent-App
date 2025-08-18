@@ -1,9 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, SafeAreaView, FlatList, StyleSheet } from "react-native";
+import { 
+  View, Text, SafeAreaView, FlatList, StyleSheet, ScrollView, Image,TouchableOpacity 
+} from "react-native";
 import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import CustomDrawer from "../../components/drawer"; // import your reusable drawer
+import CustomDrawer from "../../components/drawer";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Profile() {
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
@@ -19,11 +22,6 @@ export default function Profile() {
         setLoading(true);
         try {
           const storedToken = await AsyncStorage.getItem("userToken");
-          // if (!storedToken) {
-          //   router.replace("/(tabs)/SignInScreen");
-          //   return;
-          // }
-
           const storedUser = await AsyncStorage.getItem("userInfo");
           const parsedUser = storedUser ? JSON.parse(storedUser) : null;
           setUser(parsedUser);
@@ -39,17 +37,31 @@ export default function Profile() {
           setLoading(false);
         }
       }
-
       checkAuth();
     }, [])
   );
 
-  const renderHouses = ({ item }) => (
-    <View style={styles.listItem}>
+const renderHouses = ({ item }) => (
+  <View style={styles.listItem}>
+    {/* Image container */}
+    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
+      {item.images.map((img, index) => (
+        <Image
+          key={index}
+          source={{ uri: img }}
+          style={styles.houseImage}
+          resizeMode="cover"
+        />
+      ))}
+    </ScrollView>
+
+    {/* Text info */}
+    <View style={styles.infoContainer}>
       <Text style={styles.listTitle}>{item.title}</Text>
       <Text style={styles.listPrice}>{item.price}</Text>
     </View>
-  );
+  </View>
+);
 
   const renderBoardingHouses = ({ item }) => (
     <View style={styles.listItem}>
@@ -66,17 +78,37 @@ export default function Profile() {
     );
   }
 
+  const EmptyState = ({ type }) => (
+    <View style={styles.emptyContainer}>
+      <MaterialCommunityIcons
+        name={type === "house" ? "home-off" : "home-city-outline"}
+        size={60}
+        color="gray"
+      />
+      <Text style={styles.emptyText}>
+        {type === "house" ? "No houses listed yet" : "No boarding houses listed yet"}
+      </Text>
+      <TouchableOpacity
+        style={styles.addListingButton}
+        onPress={() => router.push("/screens/addlisting")}
+      >
+        <Text style={styles.addListingButtonText}>
+          {type === "house" ? "Add your first house" : "Add your first boarding house"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <CustomDrawer>
       <Stack.Screen options={{ headerShown: false }} />
-
       <View style={styles.container}>
         <Text style={styles.header}>Welcome {user?.name}</Text>
         <Text style={styles.subHeader}>Manage your properties here</Text>
 
         <Text style={styles.sectionTitle}>Houses 🏠</Text>
         {info.houses.length === 0 ? (
-          <Text style={styles.emptyText}>No houses listed yet</Text>
+          <EmptyState type="house" />
         ) : (
           <FlatList
             data={info.houses}
@@ -85,9 +117,9 @@ export default function Profile() {
           />
         )}
 
-        <Text style={styles.sectionTitle}>Boarding Houses 🏠</Text>
+        <Text style={styles.sectionTitle}>Boarding Houses 🏢</Text>
         {info.boarding_houses.length === 0 ? (
-          <Text style={styles.emptyText}>No boarding houses listed yet</Text>
+          <EmptyState type="boarding" />
         ) : (
           <FlatList
             data={info.boarding_houses}
@@ -119,12 +151,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 5,
-    alignSelf:"center"
+    alignSelf: "center",
   },
   subHeader: {
     fontSize: 17,
     marginBottom: 15,
-    marginTop:9,
+    marginTop: 9,
   },
   sectionTitle: {
     fontSize: 20,
@@ -132,10 +164,28 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
   },
+  emptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 20,
+  },
   emptyText: {
-    color: "blue",
+    color: "gray",
     fontSize: 18,
-    marginBottom: 10,
+    marginTop: 10,
+    textAlign: "center",
+  },
+  addListingButton: {
+    backgroundColor: "blue",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 15,
+  },
+  addListingButtonText: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 16,
   },
   listItem: {
     backgroundColor: "white",
@@ -156,5 +206,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "green",
     marginTop: 5,
+  },
+  houseImage: {
+    width: 300,
+    height: 200,
+    marginRight: 10,
+    borderRadius: 10,
+  },
+  infoContainer: {
+    padding: 10,
   },
 });

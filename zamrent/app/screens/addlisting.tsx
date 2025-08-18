@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { 
   View, Text, SafeAreaView, TextInput, TouchableOpacity,
- ScrollView, Image, StyleSheet, Platform } from "react-native";
+  ScrollView, Image, StyleSheet
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import CustomDrawer from "../../components/drawer"; // Import your drawer
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import CustomDrawer from "../../components/drawer"; // Import your drawer
 
 export default function AddListing() {
   const router = useRouter();
+
+  // State variables
   const [listingType, setListingType] = useState("house");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,174 +28,166 @@ export default function AddListing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-    const handleGetLocation = async () => {
+  // Reset drawer state on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      if (CustomDrawer?.setDrawerOpen) {
+        CustomDrawer.setDrawerOpen(false); // Reset drawer if necessary
+      }
+    }, [])
+  );
+
+  // Get current location
+  const handleGetLocation = async () => {
     try {
-        // Request permission to access location
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
         alert("Permission to access location was denied");
         return;
-        }
-
-        // Get current location
-        let location = await Location.getCurrentPositionAsync({});
-        console.log(location.coords.latitude,"This is the latitude");
-        setLatitude(location.coords.latitude.toString());
-        setLongitude(location.coords.longitude.toString());
-        alert("location captured!");
+      }
+      let loc = await Location.getCurrentPositionAsync({});
+      setLatitude(loc.coords.latitude.toString());
+      setLongitude(loc.coords.longitude.toString());
+      alert("Location captured!");
     } catch (err) {
-        alert("Unable to get location: " + err.message);
-        console.error(err);
+      alert("Unable to get location: " + err.message);
+      console.error(err);
     }
-    };
+  };
 
+  // Pick images from library
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 1,
     });
-
     if (!result.canceled) {
       setImages((prev) => [...prev, ...result.assets]);
     }
   };
 
+  // Remove selected image
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-    const handleSubmit = async () => {
+  // Submit listing
+  const handleSubmit = async () => {
     setLoading(true);
     setError("");
 
     try {
-        const storedUser = await AsyncStorage.getItem("userToken");
-        const user = storedUser ? JSON.parse(storedUser) : null;
+      const storedUser = await AsyncStorage.getItem("userInfo");
+      const token = await AsyncStorage.getItem("userToken");
+      const user = storedUser ? JSON.parse(storedUser) : null;
 
-        if (!user || !user.token) {
+      if (!user || !token) {
         setError("You must be logged in");
         setLoading(false);
         return;
-        }
+      }
 
-        const owner_id = user.id;
+      const owner_id = user.id;
 
-        if (!title || !description || !price || !location) {
+      if (!title || !description || !price || !location) {
         setError("Please fill all required fields");
         setLoading(false);
         return;
-        }
+      }
 
-        if (images.length !== 3) {
+      if (images.length !== 3) {
         setError("Please upload exactly 3 images");
         setLoading(false);
         return;
-        }
+      }
 
-        let endpoint = "";
-        let payload = {};
-        const image_endpoint = `http://localhost:5000/api/imageupload`;
+      let endpoint = "";
+      let payload = {};
+      const image_endpoint = `http://localhost:5000/api/imageupload`;
 
-        if (listingType === "house") {
+      if (listingType === "house") {
         if (!numberOfRooms) {
-            setError("Please specify number of rooms");
-            setLoading(false);
-            return;
+          setError("Please specify number of rooms");
+          setLoading(false);
+          return;
         }
-
         endpoint = `http://localhost:5000/api/property/house`;
         payload = {
-            title,
-            owner_id,
-            location,
-            latitude,
-            longitude,
-            description,
-            type: listingType,
-            bedrooms: Number(numberOfRooms),
-            price: Number(price),
+          title,
+          owner_id,
+          location,
+          latitude,
+          longitude,
+          description,
+          type: listingType,
+          bedrooms: Number(numberOfRooms),
+          price: Number(price),
         };
-        } else {
+      } else {
         if (!bedSpaces || !bathrooms) {
-            setError("Please specify bed spaces and bathrooms");
-            setLoading(false);
-            return;
+          setError("Please specify bed spaces and bathrooms");
+          setLoading(false);
+          return;
         }
-
         endpoint = `http://localhost:5000/api/property/boardinghouse`;
         payload = {
-            title,
-            owner_id,
-            description,
-            price: Number(price),
-            location,
-            type: listingType,
-            latitude,
-            longitude,
-            bed_spaces: Number(bedSpaces),
-            bathrooms: Number(bathrooms),
+          title,
+          owner_id,
+          description,
+          price: Number(price),
+          location,
+          type: listingType,
+          latitude,
+          longitude,
+          bed_spaces: Number(bedSpaces),
+          bathrooms: Number(bathrooms),
         };
-        }
+      }
 
-        // Send listing data
-        console.log("Payload being sent:", payload);
-        const response = await fetch(endpoint, {
+      // Send listing data
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
-        });
+      });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to add listing");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to add listing");
 
-        const listingId =
-        listingType === "house" ? data.house?.id : data.boarding_house?.id;
+      const listingId = listingType === "house" ? data.house?.id : data.boarding_house?.id;
+      if (!listingId) throw new Error("Listing ID not found in backend response");
 
-        if (!listingId) {
-        throw new Error("Listing ID not found in backend response");
-        }
+      // Send images
+      const imagePayload = {
+        images: images.map((img) => ({ image_url: img.uri })),
+        ...(listingType === "house" ? { house_id: listingId } : { boarding_house_id: listingId }),
+      };
 
-        // Prepare image payload
-        const imagePayload = {
-        images: images.map((img) => ({
-            image_url: img.uri, // React Native uses uri
-            // optionally you can generate a public_id if you upload via Cloudinary
-        })),
-        };
-
-        if (listingType === "house") {
-        imagePayload.house_id = listingId;
-        } else {
-        imagePayload.boarding_house_id = listingId;
-        }
-
-        const imageResponse = await fetch(image_endpoint, {
+      const imageResponse = await fetch(image_endpoint, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(imagePayload),
-        });
+      });
 
-        const imageResult = await imageResponse.json();
-        if (!imageResponse.ok)
-        throw new Error(imageResult.message || "Image upload failed");
+      const imageResult = await imageResponse.json();
+      if (!imageResponse.ok) throw new Error(imageResult.message || "Image upload failed");
 
-        // Navigate to dashboard
-        router.push("/Profile");
+      // Navigate back to profile/dashboard
+      router.push("/(tabs)/Profile");
     } catch (err) {
-        console.error(err);
-        setError(err.message || "Server error while adding listing");
+      console.error(err);
+      setError(err.message || "Server error while adding listing");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
-
+  };
 
   return (
     <CustomDrawer>
