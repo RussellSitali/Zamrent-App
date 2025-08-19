@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { 
-  View, Text, SafeAreaView, FlatList, StyleSheet, ScrollView, Image,TouchableOpacity 
+  View, Text, SafeAreaView, FlatList, StyleSheet, ScrollView, Alert,Image,TouchableOpacity 
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +16,15 @@ export default function Profile() {
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
 
+  // delete button sucker
+  const confirmDelete = (id) => {
+    // I want to send, user_id, property_id, and property_type
+    router.push({
+      pathname:"/screens/confirmdeletescreen",
+      params: {id: id},
+    })
+  };
+
   useFocusEffect(
     useCallback(() => {
       async function checkAuth() {
@@ -29,6 +38,7 @@ export default function Profile() {
           const res = await fetch(`${baseURL}/api/listings/mine`, {
             headers: { Authorization: `Bearer ${storedToken}` },
           });
+
           const data = await res.json();
           setInfo(data);
         } catch (error) {
@@ -41,39 +51,92 @@ export default function Profile() {
     }, [])
   );
 
-const renderHouses = ({ item }) => (
-  <View style={styles.listItem}>
-    {/* Image container */}
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-      {item.images.map((img, index) => (
-        <Image
-          key={index}
-          source={{ uri: img }}
-          style={styles.houseImage}
-          resizeMode="cover"
-        />
-      ))}
-    </ScrollView>
+  const renderHouses = ({ item }) => {
+    // Fallback image (local asset or a URL)
+    const fallbackImage = "https://placehold.co/600x400?text=No+House+Image";
 
-    {/* Text info */}
-    <View style={styles.infoContainer}>
-      <Text style={styles.listTitle}>{item.title}</Text>
-      <Text style={styles.listPrice}>{item.price}</Text>
-    </View>
-  </View>
-);
+    // Use item.images if available, otherwise show fallback
+    const imagesToShow =
+      item.images && item.images.length > 0 ? item.images : [fallbackImage];
 
-  const renderBoardingHouses = ({ item }) => (
-    <View style={styles.listItem}>
-      <Text style={styles.listTitle}>{item.title}</Text>
-      <Text style={styles.listPrice}>{item.price}</Text>
-    </View>
-  );
+    return (
+      <View style={styles.listItem}>
+        {/* Image container */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+        >
+          {imagesToShow.map((img, index) => (
+            <Image
+              key={index}
+              source={{ uri: img }}
+              style={styles.houseImage}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+
+        {/* Text info */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.listTitle}>{item.title}</Text>
+          <Text style={styles.listPrice}>K{item.price}</Text>
+        </View>
+
+        {/* Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.editButton} onPress={() => console.log("Edit", item.id)}>
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const renderBoardingHouses = ({ item }) => {
+    // Fallback image (local asset or a URL)
+   const fallbackImage = "https://placehold.co/600x400?text=No+BoardingHouse+Image";
+
+
+    // Use item.images if available, otherwise show fallback
+    const imagesToShow =
+      item.images && item.images.length > 0 ? item.images : [fallbackImage];
+
+    return (
+      <View style={styles.listItem}>
+        {/* Image container */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+        >
+          {imagesToShow.map((img, index) => (
+            <Image
+              key={index}
+              source={{ uri: img }}
+              style={styles.houseImage}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+
+        {/* Text info */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.listTitle}>{item.title}</Text>
+          <Text style={styles.listPrice}>K{item.price}</Text>
+        </View>
+      </View>
+    );
+  };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}> Loading... </Text>
       </SafeAreaView>
     );
   }
@@ -106,7 +169,7 @@ const renderHouses = ({ item }) => (
         <Text style={styles.header}>Welcome {user?.name}</Text>
         <Text style={styles.subHeader}>Manage your properties here</Text>
 
-        <Text style={styles.sectionTitle}>Houses 🏠</Text>
+        <Text style={styles.sectionTitle}> Houses 🏠</Text>
         {info.houses.length === 0 ? (
           <EmptyState type="house" />
         ) : (
@@ -117,7 +180,7 @@ const renderHouses = ({ item }) => (
           />
         )}
 
-        <Text style={styles.sectionTitle}>Boarding Houses 🏢</Text>
+        <Text style={styles.sectionTitle}>  Boarding Houses 🏢 </Text>
         {info.boarding_houses.length === 0 ? (
           <EmptyState type="boarding" />
         ) : (
@@ -216,4 +279,26 @@ const styles = StyleSheet.create({
   infoContainer: {
     padding: 10,
   },
+  buttonRow: {
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  marginTop: 10,
+  gap: 10, 
+},
+editButton: {
+  backgroundColor: "#4CAF50", 
+  paddingVertical: 8,
+  paddingHorizontal: 15,
+  borderRadius: 5,
+},
+deleteButton: {
+  backgroundColor: "#F44336", 
+  paddingVertical: 8,
+  paddingHorizontal: 15,
+  borderRadius: 5,
+},
+buttonText: {
+  color: "white",
+  fontWeight: "600",
+},
 });
