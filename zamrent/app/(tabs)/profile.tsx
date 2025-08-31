@@ -15,15 +15,46 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
+  const [showmore, setShowmore] = useState(false);
 
   // delete button sucker
-  const confirmDelete = (id) => {
+  const confirmDelete = (id, type) => {
     // I want to send, user_id, property_id, and property_type
     router.push({
       pathname:"/screens/confirmdeletescreen",
-      params: {id: id},
+      params: {
+        propertyId: id,
+        propertyType: type,
+      },
     })
   };
+
+  // when the user presses the show more button 
+  const moreinfo = () => {
+    setShowmore(!showmore);
+  }
+
+  // when the user wants to edit a property
+  const handleEdit = (id, type) =>{
+    if(type ==="house"){
+      router.push({
+      pathname:"/screens/edithouse",
+      params: {
+        propertyId: id,
+        propertyType: type,
+      },
+    })
+      
+    }else if(type ==="boardinghouse"){
+      router.push({
+      pathname:"/screens/editboardinghouse",
+      params: {
+        propertyId: id,
+        propertyType: type,
+      },
+    })
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -34,6 +65,7 @@ export default function Profile() {
           const storedUser = await AsyncStorage.getItem("userInfo");
           const parsedUser = storedUser ? JSON.parse(storedUser) : null;
           setUser(parsedUser);
+          
 
           const res = await fetch(`${baseURL}/api/listings/mine`, {
             headers: { Authorization: `Bearer ${storedToken}` },
@@ -81,15 +113,20 @@ export default function Profile() {
         <View style={styles.infoContainer}>
           <Text style={styles.listTitle}>{item.title}</Text>
           <Text style={styles.listPrice}>K{item.price}</Text>
+            <TouchableOpacity onPress={moreinfo}>
+              <Text style={{color:"black"}}>
+                {showmore?"show less":"show more"}
+              </Text>
+            </TouchableOpacity>
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.editButton} onPress={() => console.log("Edit", item.id)}>
+          <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item.id, "house")}>
             <Text style={styles.buttonText}>Edit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id, "house")}>
             <Text style={styles.buttonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -128,6 +165,22 @@ export default function Profile() {
         <View style={styles.infoContainer}>
           <Text style={styles.listTitle}>{item.title}</Text>
           <Text style={styles.listPrice}>K{item.price}</Text>
+          <TouchableOpacity onPress={moreinfo}>
+            <Text style={{color:"black"}}>
+              {showmore?"show less":"show more"}
+            </Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item.id, "boardinghouse")}>
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id, "boardinghouse")}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -166,8 +219,8 @@ export default function Profile() {
     <CustomDrawer>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
-        <Text style={styles.header}>Welcome {user?.name}</Text>
-        <Text style={styles.subHeader}>Manage your properties here</Text>
+        <Text style={styles.header}> Welcome {user?.name} </Text>
+        <Text style={styles.subHeader}> Manage your properties here </Text>
 
         <Text style={styles.sectionTitle}> Houses 🏠</Text>
         {info.houses.length === 0 ? (
@@ -220,6 +273,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginBottom: 15,
     marginTop: 9,
+    alignSelf:"center"
   },
   sectionTitle: {
     fontSize: 20,

@@ -1,19 +1,24 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Stack, useRouter, useLocalSearchParams} from "expo-router";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ConfirmDeleteScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { id } = params; 
+  const { propertyId, propertyType } = params;
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
-  const handleDelete = () => {
-    console.log("Deleting property with id:", id);
+  const handleDelete = async() => {
+    
+        const token = await AsyncStorage.getItem("userToken");
+
     const res = await axios.post(
-        "http://localhost:5000/api/deleteproperty",
+        `${baseURL}/api/deleteproperty`,
         {
-          id,
-          type,
+          id: propertyId,
+          type: propertyType,
         },
         {
           headers: {
