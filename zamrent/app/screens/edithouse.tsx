@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,13 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function EditHouse() {
   const router = useRouter();
@@ -36,41 +36,41 @@ export default function EditHouse() {
   const [loading, setLoading] = useState(false);
   const [locationCaptured, setLocationCaptured] = useState(false);
 
-  // Fetch existing house data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("userToken");
-        if (!token) {
-          Alert.alert("Error", "No token found. Please log in again.");
-          router.replace("/(tabs)/SignInScreen");
-          return;
+  // Fetch existing house data with redirect if not logged in
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const token = await AsyncStorage.getItem("userToken");
+          if (!token) {
+            router.replace("/(tabs)/SignInScreen"); // Redirect if not logged in
+            return;
+          }
+
+          const res = await axios.get(
+            `http://localhost:5000/api/changehouse/${propertyId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          const data = res.data.house;
+          setForm({
+            title: data.title,
+            location: data.location,
+            description: data.description,
+            price: data.price.toString(),
+            bedrooms: data.bedrooms.toString(),
+            latitude: data.latitude,
+            longitude: data.longitude,
+          });
+          setOldImages(res.data.images || []);
+        } catch (err) {
+          console.error("Failed to fetch house", err);
         }
+      };
 
-        const res = await axios.get(
-          `http://localhost:5000/api/changehouse/${propertyId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const data = res.data.house;
-        setForm({
-          title: data.title,
-          location: data.location,
-          description: data.description,
-          price: data.price.toString(),
-          bedrooms: data.bedrooms.toString(),
-          latitude: data.latitude,
-          longitude: data.longitude,
-        });
-        setOldImages(res.data.images || []);
-      } catch (err) {
-        console.error("Failed to fetch house", err);
-        Alert.alert("Error", "Failed to load house data.");
-      }
-    };
-
-    fetchData();
-  }, [propertyId]);
+      fetchData();
+    }, [propertyId])
+  );
 
   // Update form fields
   const handleChange = (field, value) => {
@@ -82,7 +82,7 @@ export default function EditHouse() {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location access was denied.");
+        alert("Permission to access location was denied.");
         return;
       }
       let loc = await Location.getCurrentPositionAsync({});
@@ -92,9 +92,9 @@ export default function EditHouse() {
         longitude: loc.coords.longitude.toString(),
       }));
       setLocationCaptured(true);
-      Alert.alert("Success", "Location captured!");
+      alert("Location captured!");
     } catch (err) {
-      Alert.alert("Error", "Unable to get location.");
+      alert("Unable to get location.");
       console.error(err);
     }
   };
@@ -110,7 +110,7 @@ export default function EditHouse() {
     if (!result.canceled) {
       const picked = result.assets;
       if (picked.length !== 3) {
-        Alert.alert("Invalid", "Please select exactly 3 images.");
+        alert("Please select exactly 3 images.");
         return;
       }
       setNewImages(picked);
@@ -144,25 +144,42 @@ export default function EditHouse() {
   };
 
   // Submit updated house
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     setLoading(true);
 
     try {
       const token = await AsyncStorage.getItem("userToken");
       if (!token) {
-        Alert.alert("Error", "No token found. Please log in again.");
+        router.replace("/(tabs)/SignInScreen");
         setLoading(false);
         return;
       }
 
       let imageUrls = [];
 
+      // Upload new images if exactly 3 are selected
       if (newImages.length === 3) {
-        imageUrls = await Promise.all(newImages.map(uploadToCloudinary));
+        try {
+          imageUrls = await Promise.all(
+            newImages.map(async (img) => {
+              try {
+                return await uploadToCloudinary(img);
+              } catch (uploadErr) {
+                throw new Error(`Failed to upload image: ${img.uri}`);
+              }
+            })
+          );
+        } catch (imgError) {
+          alert(imgError.message);
+          setLoading(false);
+          return; // stop submission if any upload fails
+        }
       }
 
       const payload = {
         ...form,
+        price: Number(form.price),
+        bedrooms: Number(form.bedrooms),
         latitude: form.latitude || null,
         longitude: form.longitude || null,
         ...(imageUrls.length === 3 && { images: imageUrls }),
@@ -186,11 +203,11 @@ export default function EditHouse() {
         }
       }
 
-      Alert.alert("Success", "House updated successfully.");
+      alert("House updated successfully.");
       router.push("/(tabs)/Profile");
     } catch (err) {
       console.error("Update failed", err);
-      Alert.alert("Error", "Something went wrong while updating.");
+      alert("Something went wrong while updating.");
     } finally {
       setLoading(false);
     }
@@ -284,15 +301,8 @@ export default function EditHouse() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 15,
-    alignSelf: "center",
-  },
+  container: { padding: 20 },
+  header: { fontSize: 28, fontWeight: "700", marginBottom: 15, alignSelf: "center" },
   input: {
     borderWidth: 1,
     borderColor: "gray",
@@ -315,21 +325,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
   },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  imagePreviewContainer: {
-    flexDirection: "row",
-    marginVertical: 10,
-    flexWrap: "wrap",
-  },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 5,
-    marginRight: 10,
-    marginBottom: 10,
-  },
+  buttonText: { color: "white", fontWeight: "700", fontSize: 16 },
+  imagePreviewContainer: { flexDirection: "row", marginVertical: 10, flexWrap: "wrap" },
+  imagePreview: { width: 100, height: 100, borderRadius: 5, marginRight: 10, marginBottom: 10 },
 });

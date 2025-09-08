@@ -31,7 +31,7 @@ export default function CustomDrawer({ children }) {
   const handleLogout = async () => {
     await AsyncStorage.removeItem("userToken");
     await AsyncStorage.removeItem("userInfo");
-    router.replace("/(tabs)/SignInScreen");
+    router.replace("/(tabs)/HomeScreen");
   };
 
   return (

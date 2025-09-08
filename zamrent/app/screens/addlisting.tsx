@@ -1,19 +1,24 @@
 import React, { useState, useCallback } from "react";
-import { 
-  View, Text, SafeAreaView, TextInput, TouchableOpacity,
-  ScrollView, Image, StyleSheet
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StyleSheet,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import CustomDrawer from "../../components/drawer"; // Import your drawer
+import CustomDrawer from "../../components/drawer";
 
 export default function AddListing() {
   const router = useRouter();
 
-  // State variables
   const [listingType, setListingType] = useState("house");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -27,25 +32,36 @@ export default function AddListing() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
 
-  // Reset drawer state on screen focus
   useFocusEffect(
     useCallback(() => {
-      if (CustomDrawer?.setDrawerOpen) {
-        CustomDrawer.setDrawerOpen(false); // Reset drawer if necessary
-      }
+      const checkAuth = async () => {
+        try {
+          const storedUser = await AsyncStorage.getItem("userInfo");
+          const token = await AsyncStorage.getItem("userToken");
+          if (!storedUser || !token) {
+            router.replace("/(tabs)/SignInScreen");
+            return;
+          }
+          setUser(JSON.parse(storedUser));
+        } catch (err) {
+          console.error("Error checking auth", err);
+          router.replace("/(tabs)/SignInScreen");
+        }
+      };
+      checkAuth();
     }, [])
   );
 
-  // Get current location
   const handleGetLocation = async () => {
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         alert("Permission to access location was denied");
         return;
       }
-      let loc = await Location.getCurrentPositionAsync({});
+      const loc = await Location.getCurrentPositionAsync({});
       setLatitude(loc.coords.latitude.toString());
       setLongitude(loc.coords.longitude.toString());
       alert("Location captured!");
@@ -55,7 +71,6 @@ export default function AddListing() {
     }
   };
 
-  // Pick images from library
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -67,28 +82,20 @@ export default function AddListing() {
     }
   };
 
-  // Remove selected image
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  // Submit listing
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const storedUser = await AsyncStorage.getItem("userInfo");
-      const token = await AsyncStorage.getItem("userToken");
-      const user = storedUser ? JSON.parse(storedUser) : null;
-
-      if (!user || !token) {
+      if (!user) {
         setError("You must be logged in");
         setLoading(false);
         return;
       }
-
-      const owner_id = user.id;
 
       if (!title || !description || !price || !location) {
         setError("Please fill all required fields");
@@ -102,9 +109,45 @@ export default function AddListing() {
         return;
       }
 
+      // Upload images to Cloudinary
+      const uploadedImages = [];
+      for (const img of images) {
+        const formData = new FormData();
+        formData.append("file", {
+          uri: img.uri,
+          type: "image/jpeg",
+          name: `listing_${Date.now()}.jpg`,
+        });
+        formData.append("upload_preset", "zamrent");
+        formData.append("folder", "zamrent_listings");
+
+        const cloudResponse = await fetch(
+          "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        const cloudData = await cloudResponse.json();
+        console.log("Cloudinary response:", cloudData);
+
+        if (!cloudResponse.ok) {
+          throw new Error(cloudData.error?.message || "Cloudinary upload failed");
+        }
+
+        uploadedImages.push({
+          url: cloudData.secure_url,
+          public_id: cloudData.public_id,
+        });
+      }
+
+      // Create listing payload
       let endpoint = "";
       let payload = {};
-      const image_endpoint = `http://localhost:5000/api/imageupload`;
 
       if (listingType === "house") {
         if (!numberOfRooms) {
@@ -115,7 +158,7 @@ export default function AddListing() {
         endpoint = `http://localhost:5000/api/property/house`;
         payload = {
           title,
-          owner_id,
+          owner_id: user.id,
           location,
           latitude,
           longitude,
@@ -123,6 +166,7 @@ export default function AddListing() {
           type: listingType,
           bedrooms: Number(numberOfRooms),
           price: Number(price),
+          images: uploadedImages,
         };
       } else {
         if (!bedSpaces || !bathrooms) {
@@ -133,7 +177,7 @@ export default function AddListing() {
         endpoint = `http://localhost:5000/api/property/boardinghouse`;
         payload = {
           title,
-          owner_id,
+          owner_id: user.id,
           description,
           price: Number(price),
           location,
@@ -142,15 +186,16 @@ export default function AddListing() {
           longitude,
           bed_spaces: Number(bedSpaces),
           bathrooms: Number(bathrooms),
+          images: uploadedImages,
         };
       }
 
-      // Send listing data
+      // Send listing to backend
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${await AsyncStorage.getItem("userToken")}`,
         },
         body: JSON.stringify(payload),
       });
@@ -158,28 +203,6 @@ export default function AddListing() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to add listing");
 
-      const listingId = listingType === "house" ? data.house?.id : data.boarding_house?.id;
-      if (!listingId) throw new Error("Listing ID not found in backend response");
-
-      // Send images
-      const imagePayload = {
-        images: images.map((img) => ({ image_url: img.uri })),
-        ...(listingType === "house" ? { house_id: listingId } : { boarding_house_id: listingId }),
-      };
-
-      const imageResponse = await fetch(image_endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(imagePayload),
-      });
-
-      const imageResult = await imageResponse.json();
-      if (!imageResponse.ok) throw new Error(imageResult.message || "Image upload failed");
-
-      // Navigate back to profile/dashboard
       router.push("/(tabs)/Profile");
     } catch (err) {
       console.error(err);
@@ -195,33 +218,90 @@ export default function AddListing() {
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.header}>Add New Listing</Text>
 
+          {/* Listing type toggle */}
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={() => setListingType("house")}>
-              <Text style={[styles.toggleButton, listingType === "house" && styles.activeToggle]}>House</Text>
+              <Text
+                style={[
+                  styles.toggleButton,
+                  listingType === "house" && styles.activeToggle,
+                ]}
+              >
+                House
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setListingType("boardinghouse")}>
-              <Text style={[styles.toggleButton, listingType === "boardinghouse" && styles.activeToggle]}>Boarding House</Text>
+              <Text
+                style={[
+                  styles.toggleButton,
+                  listingType === "boardinghouse" && styles.activeToggle,
+                ]}
+              >
+                Boarding House
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <TextInput style={styles.input} placeholder="Title" value={title} onChangeText={setTitle} />
-          <TextInput style={styles.input} placeholder="Description" value={description} onChangeText={setDescription} />
-          <TextInput style={styles.input} placeholder="Price" keyboardType="numeric" value={price} onChangeText={setPrice} />
-          <TextInput style={styles.input} placeholder="Location" value={location} onChangeText={setLocation} />
+          {/* Common inputs */}
+          <TextInput
+            style={styles.input}
+            placeholder="Title"
+            value={title}
+            onChangeText={setTitle}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Description"
+            value={description}
+            onChangeText={setDescription}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Price"
+            keyboardType="numeric"
+            value={price}
+            onChangeText={setPrice}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Location"
+            value={location}
+            onChangeText={setLocation}
+          />
 
           <TouchableOpacity style={styles.buttonSecondary} onPress={handleGetLocation}>
             <Text style={styles.buttonText}>Use My Current Location</Text>
           </TouchableOpacity>
 
+          {/* Specific inputs */}
           {listingType === "house" ? (
-            <TextInput style={styles.input} placeholder="Number of bedrooms" keyboardType="numeric" value={numberOfRooms} onChangeText={setNumberOfRooms} />
+            <TextInput
+              style={styles.input}
+              placeholder="Number of bedrooms"
+              keyboardType="numeric"
+              value={numberOfRooms}
+              onChangeText={setNumberOfRooms}
+            />
           ) : (
-            <>
-              <TextInput style={styles.input} placeholder="Bed Spaces" keyboardType="numeric" value={bedSpaces} onChangeText={setBedSpaces} />
-              <TextInput style={styles.input} placeholder="Bathrooms" keyboardType="numeric" value={bathrooms} onChangeText={setBathrooms} />
-            </>
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="Bed Spaces"
+                keyboardType="numeric"
+                value={bedSpaces}
+                onChangeText={setBedSpaces}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Bathrooms"
+                keyboardType="numeric"
+                value={bathrooms}
+                onChangeText={setBathrooms}
+              />
+            </View>
           )}
 
+          {/* Images */}
           <TouchableOpacity style={styles.buttonSecondary} onPress={pickImages}>
             <Text style={styles.buttonText}>Upload Images</Text>
           </TouchableOpacity>
@@ -231,7 +311,10 @@ export default function AddListing() {
               {images.map((img, index) => (
                 <View key={index} style={{ position: "relative", marginRight: 10 }}>
                   <Image source={{ uri: img.uri }} style={styles.imagePreview} />
-                  <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(index)}>
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => removeImage(index)}
+                  >
                     <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
                   </TouchableOpacity>
                 </View>
@@ -242,7 +325,9 @@ export default function AddListing() {
           {error && <Text style={{ color: "red" }}>{error}</Text>}
 
           <TouchableOpacity style={styles.buttonPrimary} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>{loading ? "Adding..." : "Add Listing"}</Text>
+            <Text style={styles.buttonText}>
+              {loading ? "Adding..." : "Add Listing"}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -251,9 +336,7 @@ export default function AddListing() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
+  container: { padding: 20 },
   header: {
     fontSize: 28,
     fontWeight: "700",
@@ -275,11 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     color: "gray",
   },
-  activeToggle: {
-    backgroundColor: "blue",
-    color: "white",
-    borderColor: "blue",
-  },
+  activeToggle: { backgroundColor: "blue", color: "white", borderColor: "blue" },
   input: {
     borderWidth: 1,
     borderColor: "gray",
@@ -302,21 +381,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
   },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
+  buttonText: { color: "white", fontWeight: "700", fontSize: 16 },
   imagePreviewContainer: {
     flexDirection: "row",
     marginVertical: 10,
     flexWrap: "wrap",
   },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 5,
-  },
+  imagePreview: { width: 100, height: 100, borderRadius: 5 },
   removeImageButton: {
     position: "absolute",
     top: -8,

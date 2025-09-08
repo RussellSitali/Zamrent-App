@@ -37,7 +37,7 @@ export default function ConfirmDeleteScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Delete Property</Text>
+      <Text style={styles.title}> Delete Property </Text>
       <Text style={styles.message}>
         Are you sure you want to delete this property?
       </Text>

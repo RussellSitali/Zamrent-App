@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,  useCallback  } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import * as Location from "expo-location";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native"; 
 
 export default function EditBoardingHouse() {
   const router = useRouter();
@@ -37,42 +38,43 @@ export default function EditBoardingHouse() {
   const [error, setError] = useState("");
 
   // Fetch existing data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("userToken");
-        if (!token) {
-          alert("No token found. Please log in again.");
-          router.replace("/(tabs)/SignInScreen");
-          return;
-        }
+  useFocusEffect(
+      useCallback(() => {
+        const fetchData = async () => {
+          try {
+            const token = await AsyncStorage.getItem("userToken");
+            if (!token) {
+              router.replace("/(tabs)/SignInScreen");
+              return;
+            }
 
-        const res = await axios.get(
-          `http://localhost:5000/api/property/boardinghouse/${propertyId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+            const res = await axios.get(
+              `http://localhost:5000/api/changeboardinghouse/${propertyId}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-        const data = res.data.boardinghouse;
-     
-        setForm({
-          title: data.title,
-          location: data.location,
-          description: data.description,
-          price: data.price.toString(),
-          bedspaces: data.bed_spaces.toString(),
-          bathrooms: data.bathrooms.toString(),
-          latitude: data.latitude,
-          longitude: data.longitude,
-        });
-        setOldImages(res.data.images || []);
-      } catch (err) {
-        console.error("Failed to fetch listing", err);
-        setError("Failed to load data");
-      }
-    };
+            const data = res.data.boardinghouse;
 
-    fetchData();
-  }, [propertyId]);
+            setForm({
+              title: data.title,
+              location: data.location,
+              description: data.description,
+              price: data.price.toString(),
+              bedspaces: data.bed_spaces.toString(),
+              bathrooms: data.bathrooms.toString(),
+              latitude: data.latitude,
+              longitude: data.longitude,
+            });
+            setOldImages(res.data.images || []);
+          } catch (err) {
+            console.error("Failed to fetch listing", err);
+            setError("Failed to load data");
+          }
+        };
+
+        fetchData();
+      }, [propertyId])
+    );
 
   // Update form fields
   const handleChange = (field, value) => {
@@ -141,11 +143,41 @@ export default function EditBoardingHouse() {
         bathrooms: Number(form.bathrooms),
       };
 
-      // If new images were selected, include them
+      // If new images were selected, upload them first
       if (newImages.length === 3) {
-        payload.images = newImages.map((img) => ({ image_url: img.uri }));
+        const uploadedImages = [];
+
+        for (const img of newImages) {
+          const formData = new FormData();
+          formData.append("file", {
+            uri: img.uri,
+            type: "image/jpeg", // adjust if needed
+            name: "boardinghouse.jpg",
+          });
+          formData.append("upload_preset", "zamrent");
+          formData.append("folder", "zamrent_listings");
+
+          const cloudRes = await fetch(
+            "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          const cloudData = await cloudRes.json();
+          if (!cloudData.secure_url) throw new Error("Cloudinary upload failed");
+
+          uploadedImages.push({
+            url: cloudData.secure_url,
+            public_id: cloudData.public_id,
+          });
+        }
+
+        payload.images = uploadedImages;
       }
 
+      // Update listing in backend
       const res = await axios.patch(
         `http://localhost:5000/api/property/boardinghouse/${propertyId}`,
         payload,
