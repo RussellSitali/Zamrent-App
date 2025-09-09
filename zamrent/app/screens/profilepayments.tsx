@@ -61,15 +61,15 @@ export default function Profile() {
     );
   }
 
-  const handleEditProfile = () => console.log("Edit profile pressed");
-  const handlePayment = () => console.log("Pay listing fee pressed");
-  const handleChangePassword = () => console.log("Change password pressed");
-  const handleSupport = () => console.log("Contact support pressed");
+  const handleEditProfile = () => router.push("/screens/editprofile");
+  const handlePayment = () => router.push("/screens/payment");
+  const handleChangePassword = () => router.push("/screens/changepassword");
+  const handleSupport = () => router.push("/screens/support");
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("userToken");
     await AsyncStorage.removeItem("userInfo");
-    router.replace("/(tabs)/SignInScreen");
+    router.replace("/(tabs)/HomeScreen");
   };
 
   return (

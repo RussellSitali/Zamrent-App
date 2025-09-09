@@ -8,16 +8,16 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback  } from "react";
 import { Provider as PaperProvider, Button } from "react-native-paper";
 import RadioButtons from "../../components/RadioButtons";
 import FilterModal from "@/components/FilterModal";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 export default function HomeScreen() {
   const [location, setLocation] = useState("");
-  const [price, setPrice] = useState(100000);
+  const [price, setPrice] = useState("");
   const [propertyType, setPropertyType] = useState("house");
   const [lat, setLat] = useState(null);
   const [lon, setLon] = useState(null);
@@ -34,7 +34,27 @@ export default function HomeScreen() {
    const handleReset = () => {
       setLocation("");
       setFilter("");
+      setLat(null);
+      setLon(null);
+      setBedrooms("");
+      setBedspaces("");
+      setPrice("");
+      setError("");
     }
+
+useFocusEffect(
+      useCallback(() => {
+        // Reset everything when HomeScreen regains focus
+        setLocation("");
+        setFilter("");
+        setLat(null);
+        setLon(null);
+        setBedrooms("");
+        setBedspaces("");
+        setPrice("");
+        setError("");
+      }, [])
+    );
 
   useEffect(() => {
     if (filter === "near-me") {
@@ -86,7 +106,7 @@ export default function HomeScreen() {
       property_type: propertyType,
       ...(filter === "near-me" ? { use_coordinates: true } : {}),
       ...(propertyType === "house" ? { bedrooms, price } : {}),
-      ...(propertyType === "boardinghouse" ? { bedspaces, price } : {}),
+      ...(propertyType === "boardinghouse" ? { bed_spaces:bedspaces, price } : {}),
     };
 
     const queryParams = Object.entries(queryObject)
