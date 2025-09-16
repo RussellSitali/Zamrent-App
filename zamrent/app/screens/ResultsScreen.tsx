@@ -121,7 +121,22 @@ export default function Results() {
                 <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
                   {item.title}
                 </Text>
-                <Text style={{ fontSize: 16, color: "green" }}>K{item.price}</Text>
+                 <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
+                  location: {item.location}
+                </Text>
+                <Text style={{ fontSize: 16, color: "black" }}>K{item.price}</Text>
+               {item.type === "house" ? (
+                          item.status ? (
+                            <Text style={{ color: "red", fontSize: 19 }}>Rented</Text>
+                          ) : (
+                            <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
+                          )
+                        ) : item.type === "boardinghouse" ? (
+                          <Text style={{ fontSize: 15 }}>
+                            Bedspaces available: {item.bed_spaces}
+                          </Text>
+                   ) : null}
+
               </View>
             </TouchableOpacity>
           ))

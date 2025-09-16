@@ -17,11 +17,39 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(false);
 
+    const fetchUserListings = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken"); 
+      if (!token) {
+        router.replace("/(tabs)/SignInScreen"); 
+        return;
+      }
+
+      setLoading(true);
+      const storedUser = await AsyncStorage.getItem("userInfo");
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+
+      const res = await fetch(`${baseURL}/api/listings/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      setInfo(data);
+    } catch (error) {
+      console.error(error);
+      router.replace("/(tabs)/SignInScreen");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const changeStatus = async (houseId, currentStatus) => {
+    console.log("this is the current status ", currentStatus);
     try {
       const token = await AsyncStorage.getItem("userToken");
 
-      const res = await fetch(`${baseURL}/api/houses/${houseId}/status`, {
+      const res = await fetch(`${baseURL}/api/rentalstatus/${houseId}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -32,6 +60,8 @@ export default function Profile() {
 
       const data = await res.json();
       console.log("Updated status:", data);
+
+      fetchUserListings();
 
     } catch (err) {
       console.error("Error updating status:", err);
@@ -54,39 +84,11 @@ export default function Profile() {
     router.push({ pathname:`/screens/${path}`, params:{ propertyId:id, propertyType:type }});
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const checkLogin = async () => {
-        try {
-          const token = await AsyncStorage.getItem("userToken"); 
-          if (!token) {
-            router.replace("/(tabs)/SignInScreen"); 
-            return; // prevent continuing if not logged in
-          }
-
-          // If logged in → fetch user info and listings
-          setLoading(true);
-          const storedUser = await AsyncStorage.getItem("userInfo");
-          setUser(storedUser ? JSON.parse(storedUser) : null);
-
-          const res = await fetch(`${baseURL}/api/listings/mine`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          const data = await res.json();
-          setInfo(data);
-        } catch (error) {
-          console.error(error);
-          router.replace("/(tabs)/SignInScreen");
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      checkLogin();
-    }, [])
-  );
-
+    useFocusEffect(
+      useCallback(() => {
+        fetchUserListings();
+      }, [])
+    );
 
   // Render functions
   const renderHouses = ({ item }) => {

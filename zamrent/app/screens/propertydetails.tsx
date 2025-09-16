@@ -79,19 +79,25 @@ export default function PropertyDetailsScreen() {
           </Text>
 
           <Text style={styles.description}>
-            {propertyData.location || "No location provided."}
+            location: {propertyData.location || "No location provided."}
           </Text>
 
-          {propertyData.bed_spaces? 
-          <Text style={styles.description}>Bedspaces available {propertyData.bed_spaces}</Text>
-          :
-          <Text>Bedrooms {propertyData.bedrooms}</Text> 
-          }
-
-          {propertyData.bathrooms? 
-             <Text style={styles.description}>Bathrooms {propertyData.bathrooms}</Text> : 
-             ""
+            {propertyData.bathrooms? 
+                 <Text style={styles.description}>Bathrooms {propertyData.bathrooms}</Text> : 
+               ""
              }
+
+          {propertyData.type === "house" ? (
+                                  propertyData.status ? (
+                                    <Text style={{ color: "red", fontSize: 19 }}>Rented</Text>
+                                  ) : (
+                                    <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
+                                  )
+                                ) : propertyData.type === "boardinghouse" ? (
+                                  <Text style={{ fontSize: 15 }}>
+                                    Bedspaces available: {propertyData.bed_spaces}
+                                  </Text>
+                    ) : null}
 
         </View>
 
