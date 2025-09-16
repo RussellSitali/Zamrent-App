@@ -29,6 +29,10 @@ export default function Login() {
     setShow(!show);
   };
 
+  const resetpassword = () => {
+    router.push("/screens/resetpassword");
+  }
+
   const handleChange = (fieldName, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -116,6 +120,11 @@ export default function Login() {
                 <Text style={styles.message}>{message}</Text>
               ) : null}
             </View>
+            <TouchableOpacity
+            style={{marginTop:13,}}
+            onPress={resetpassword}>
+              Forgot password?
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

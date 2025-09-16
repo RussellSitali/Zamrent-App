@@ -114,8 +114,6 @@ useFocusEffect(
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
       .join("&");
 
-    console.log("These are the search params", queryParams);
-
     fetch(`${baseURL}/api/searchproperty?${queryParams}`, {
       method: "GET",
       headers: {

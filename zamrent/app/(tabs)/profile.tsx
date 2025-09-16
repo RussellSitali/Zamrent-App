@@ -15,12 +15,29 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
-  const [showmore, setShowmore] = useState(false);
   const [status, setStatus] = useState(false);
 
-  const changeStatus = async () => {
-      setStatus(!status);
-  } 
+  const changeStatus = async (houseId, currentStatus) => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      const res = await fetch(`${baseURL}/api/houses/${houseId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: !currentStatus }),
+      });
+
+      const data = await res.json();
+      console.log("Updated status:", data);
+
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
+  };
+
 
   const [bedInput, setBedInput] = useState({}); // store temporary bed values for boarding houses
 
@@ -31,8 +48,6 @@ export default function Profile() {
       params: { propertyId: id, propertyType: type }
     });
   };
-
-  const moreinfo = () => setShowmore(!showmore);
 
   const handleEdit = (id, type) => {
     const path = type === "house" ? "edithouse" : "editboardinghouse";
@@ -45,7 +60,7 @@ export default function Profile() {
         try {
           const token = await AsyncStorage.getItem("userToken"); 
           if (!token) {
-            router.replace("/(tabs)/SignInScreen"); // redirect if not logged in
+            router.replace("/(tabs)/SignInScreen"); 
             return; // prevent continuing if not logged in
           }
 
@@ -77,7 +92,9 @@ export default function Profile() {
   const renderHouses = ({ item }) => {
     const fallbackImage = "https://placehold.co/600x400?text=No+House+Image";
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
-    const rentStatus = item.isRented ? "Rented" : "Available";
+    const rentStatus = item.status ? "Rented" : "Available";
+
+    console.log("this is the item", item);
 
     return (
       <View style={styles.listItem}>
@@ -94,13 +111,12 @@ export default function Profile() {
             {rentStatus}
           </Text>
 
-          <TouchableOpacity onPress={changeStatus} style={{marginTop:5}}>
-            <Text style={{ color:"blue" }}>{status? "Rented":"Available"}</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5}}>
+          <Text style={{ color:"blue" }}>
+            {item.status ? "Mark as Available" : "Mark as Rented"}
+          </Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity onPress={moreinfo}>
-            <Text style={{color:"black"}}>{showmore ? "show less" : "show more"}</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.buttonRow}>
@@ -131,7 +147,6 @@ export default function Profile() {
           <Text style={styles.listPrice}>K{item.price}</Text>
           <Text style={styles.listPrice}>{item.location}</Text>
 
-
           <Text style={{ color: availableBeds > 0 ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
             {availableBeds} beds available
           </Text>
@@ -149,10 +164,6 @@ export default function Profile() {
               <Text style={{color:"blue"}}>Update Beds</Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity onPress={moreinfo}>
-            <Text style={{color:"black"}}>{showmore ? "show less" : "show more"}</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.buttonRow}>

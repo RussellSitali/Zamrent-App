@@ -20,6 +20,7 @@ import { useFocusEffect } from "@react-navigation/native";
 export default function EditHouse() {
   const router = useRouter();
   const { propertyId } = useLocalSearchParams();
+  const baseURL = process.env.EXPO_PUBLIC_API_URL
 
   const [form, setForm] = useState({
     title: "",
@@ -48,7 +49,7 @@ export default function EditHouse() {
           }
 
           const res = await axios.get(
-            `http://localhost:5000/api/changehouse/${propertyId}`,
+            `${baseURL}/api/changehouse/${propertyId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
@@ -186,7 +187,7 @@ export default function EditHouse() {
       };
 
       const res = await axios.patch(
-        `http://localhost:5000/api/updatehouse/${propertyId}`,
+        `${baseURL}/api/updatehouse/${propertyId}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -197,7 +198,7 @@ export default function EditHouse() {
         for (const url of deletedUrls) {
           const publicId = extractPublicId(url);
           await axios.post(
-            "http://localhost:5000/api/delete-from-cloudinary",
+            `${baseURL}/api/delete-from-cloudinary`,
             { public_id: publicId }
           );
         }

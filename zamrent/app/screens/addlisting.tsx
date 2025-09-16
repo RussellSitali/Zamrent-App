@@ -18,6 +18,7 @@ import CustomDrawer from "../../components/drawer";
 
 export default function AddListing() {
   const router = useRouter();
+  const baseURL = process.env.EXPO_PUBLIC_API_URL
 
   const [listingType, setListingType] = useState("house");
   const [title, setTitle] = useState("");
@@ -80,7 +81,11 @@ export default function AddListing() {
     if (!result.canceled) {
       setImages((prev) => [...prev, ...result.assets]);
     }
+
+    console.log("These are the assests ",result.assets)
   };
+
+  console.log("Here are the images ", images);
 
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
@@ -103,47 +108,57 @@ export default function AddListing() {
         return;
       }
 
-      if (images.length !== 3) {
-        setError("Please upload exactly 3 images");
+      if (images.length !== 1) {
+        setError("Please upload exactly 1 image");
         setLoading(false);
         return;
       }
 
-      // Upload images to Cloudinary
+     // Upload images to Cloudinary
       const uploadedImages = [];
-      for (const img of images) {
-        const formData = new FormData();
-        formData.append("file", {
-          uri: img.uri,
-          type: "image/jpeg",
-          name: `listing_${Date.now()}.jpg`,
-        });
-        formData.append("upload_preset", "zamrent");
-        formData.append("folder", "zamrent_listings");
 
-        const cloudResponse = await fetch(
-          "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-          {
-            method: "POST",
-            body: formData,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        const cloudData = await cloudResponse.json();
-        console.log("Cloudinary response:", cloudData);
-
-        if (!cloudResponse.ok) {
-          throw new Error(cloudData.error?.message || "Cloudinary upload failed");
-        }
-
-        uploadedImages.push({
-          url: cloudData.secure_url,
-          public_id: cloudData.public_id,
-        });
+    for (const img of images) {
+      // Make sure img.uri exists
+      if (!img.uri) {
+        console.warn("Skipping image, no uri:", img);
+        continue;
       }
+
+      console.log("This is the img",img);
+      console.log("This is the img uri: ", img.uri);
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: img.uri,
+        type: "image/jpeg",
+        name: `listing_${Date.now()}.jpg`,
+      });
+      formData.append("upload_preset", "zamrent"); 
+
+      console.log("This is the formdata we are sending ", formData);
+
+      const cloudResponse = await fetch(
+        "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await cloudResponse.json();
+      console.log("Cloudinary response:", data);
+
+      if (!cloudResponse.ok) {
+        throw new Error(data.error?.message || "Cloudinary upload failed");
+      }
+
+      uploadedImages.push({
+        url: data.secure_url,
+        public_id: data.public_id,
+      });
+    }
+
+    console.log("All uploaded images:", uploadedImages);
 
       // Create listing payload
       let endpoint = "";
@@ -155,7 +170,7 @@ export default function AddListing() {
           setLoading(false);
           return;
         }
-        endpoint = `http://localhost:5000/api/property/house`;
+        endpoint = `${baseURL}/api/property/house`;
         payload = {
           title,
           owner_id: user.id,
@@ -174,7 +189,7 @@ export default function AddListing() {
           setLoading(false);
           return;
         }
-        endpoint = `http://localhost:5000/api/property/boardinghouse`;
+        endpoint = `${baseURL}/api/property/boardinghouse`;
         payload = {
           title,
           owner_id: user.id,
