@@ -133,7 +133,7 @@ export default function Results() {
                           )
                         ) : item.type === "boardinghouse" ? (
                           <Text style={{ fontSize: 15 }}>
-                            Bedspaces available: {item.bed_spaces}
+                            Bedspaces available: {item.bedspaces_available}
                           </Text>
                    ) : null}
 

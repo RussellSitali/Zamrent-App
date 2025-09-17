@@ -95,7 +95,7 @@ export default function PropertyDetailsScreen() {
                                   )
                                 ) : propertyData.type === "boardinghouse" ? (
                                   <Text style={{ fontSize: 15 }}>
-                                    Bedspaces available: {propertyData.bed_spaces}
+                                    Bedspaces available: {propertyData.bedspaces_available}
                                   </Text>
                     ) : null}
 

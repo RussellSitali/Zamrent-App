@@ -15,7 +15,6 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState(false);
 
     const fetchUserListings = async () => {
     try {
@@ -45,7 +44,7 @@ export default function Profile() {
 
 
   const changeStatus = async (houseId, currentStatus) => {
-    console.log("this is the current status ", currentStatus);
+
     try {
       const token = await AsyncStorage.getItem("userToken");
 
@@ -68,8 +67,32 @@ export default function Profile() {
     }
   };
 
+    const changeBedspaces = async (BHId, beds) => {
 
-  const [bedInput, setBedInput] = useState({}); // store temporary bed values for boarding houses
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      const res = await fetch(`${baseURL}/api/bedspaces/${BHId}/beds`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ beds }),
+      });
+
+      const data = await res.json();
+      console.log("Updated beds:", data);
+
+      fetchUserListings();
+
+    } catch (err) {
+      console.error("Error updating bedspaces:", err);
+    }
+  };
+
+
+  const [bedInput, setBedInput] = useState({});
 
   // delete property
   const confirmDelete = (id, type) => {
@@ -96,8 +119,6 @@ export default function Profile() {
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const rentStatus = item.status ? "Rented" : "Available";
 
-    console.log("this is the item", item);
-
     return (
       <View style={styles.listItem}>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
@@ -106,11 +127,11 @@ export default function Profile() {
 
         <View style={styles.infoContainer}>
           <Text style={styles.listTitle}>{item.title}</Text>
-          <Text style={styles.listPrice}>K{item.price}</Text>
           <Text style={styles.listPrice}>{item.location}</Text>
+          <Text style={styles.listPrice}>K{item.price}</Text>
 
           <Text style={{ color: rentStatus === "Available" ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
-            {rentStatus}
+            Rental status: {rentStatus}
           </Text>
 
         <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5}}>
@@ -136,7 +157,7 @@ export default function Profile() {
   const renderBoardingHouses = ({ item }) => {
     const fallbackImage = "https://placehold.co/600x400?text=No+BoardingHouse+Image";
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
-    const availableBeds = item.totalBeds - item.occupiedBeds; // example field
+    const availableBeds = item.bedspaces_available; 
 
     return (
       <View style={styles.listItem}>
@@ -150,7 +171,7 @@ export default function Profile() {
           <Text style={styles.listPrice}>{item.location}</Text>
 
           <Text style={{ color: availableBeds > 0 ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
-            {availableBeds} beds available
+            {availableBeds} Bedspaces available
           </Text>
 
           {/* Input to change bed spaces */}
@@ -162,8 +183,8 @@ export default function Profile() {
               value={bedInput[item.id]?.toString() || ""}
               onChangeText={val => setBedInput({...bedInput, [item.id]: val})}
             />
-            <TouchableOpacity onPress={() => console.log(`Update beds for ${item.id} to ${bedInput[item.id]}`)}>
-              <Text style={{color:"blue"}}>Update Beds</Text>
+            <TouchableOpacity onPress= {()=> changeBedspaces(item.id, bedInput[item.id])}>
+              <Text style={{color:"blue"}}>Update</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -224,7 +245,7 @@ export default function Profile() {
 
         <Text style={styles.sectionTitle}> Boarding Houses 🏢 </Text>
         {info.boarding_houses.length === 0 ? (
-          <EmptyState type="boarding" />
+          <EmptyState type="boardinghouse" />
         ) : (
           <FlatList data={info.boarding_houses} renderItem={renderBoardingHouses} keyExtractor={item => item.id.toString()} />
         )}
@@ -233,7 +254,6 @@ export default function Profile() {
   );
 }
 
-// Keep your styles as before, no changes needed.
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
@@ -307,7 +327,7 @@ const styles = StyleSheet.create({
   },
   listPrice: {
     fontSize: 16,
-    color: "green",
+    color: "black",
     marginTop: 5,
   },
   houseImage: {
