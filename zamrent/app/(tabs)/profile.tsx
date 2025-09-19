@@ -58,7 +58,6 @@ export default function Profile() {
       });
 
       const data = await res.json();
-      console.log("Updated status:", data);
 
       fetchUserListings();
 
@@ -126,16 +125,18 @@ export default function Profile() {
         </ScrollView>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.listTitle}>{item.title}</Text>
-          <Text style={styles.listPrice}>{item.location}</Text>
-          <Text style={styles.listPrice}>K{item.price}</Text>
+          <Text style={styles.listPrice}>Title: {item.title}</Text>
+          <Text style={styles.listPrice}>Description: {item.description}</Text>
+          <Text style={styles.listPrice}>Location: {item.location}</Text>
+          <Text style={styles.listPrice}>Price: K{item.price}</Text>
 
-          <Text style={{ color: rentStatus === "Available" ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
-            Rental status: {rentStatus}
+          <Text style={{fontSize:19}}>Rental Status: </Text>
+          <Text style={{ color: rentStatus === "Available" ? "green" : "red", fontWeight: "bold", marginTop:1 , fontSize:19}}>
+            {rentStatus}
           </Text>
 
         <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5}}>
-          <Text style={{ color:"blue" }}>
+          <Text style={{ color:"blue", fontSize:16,}}>
             {item.status ? "Mark as Available" : "Mark as Rented"}
           </Text>
         </TouchableOpacity>
@@ -166,9 +167,10 @@ export default function Profile() {
         </ScrollView>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.listTitle}>{item.title}</Text>
-          <Text style={styles.listPrice}>K{item.price}</Text>
-          <Text style={styles.listPrice}>{item.location}</Text>
+          <Text style={styles.listPrice}>Title: {item.title}</Text>
+          <Text style={styles.listPrice}>Description: {item.description}</Text>
+          <Text style={styles.listPrice}>Location: {item.location}</Text>
+           <Text style={styles.listPrice}>Price: K{item.price}</Text>
 
           <Text style={{ color: availableBeds > 0 ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
             {availableBeds} Bedspaces available
@@ -326,9 +328,9 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   listPrice: {
-    fontSize: 16,
+    fontSize: 19,
     color: "black",
-    marginTop: 5,
+    marginTop: 3,
   },
   houseImage: {
     width: 300,

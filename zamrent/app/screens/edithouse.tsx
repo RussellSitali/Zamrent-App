@@ -158,8 +158,8 @@ export default function EditHouse() {
 
       let imageUrls = [];
 
-      // Upload new images if exactly 3 are selected
-      if (newImages.length === 3) {
+      // Upload new images if exactly 7 are selected
+      if (newImages.length === 7) {
         try {
           imageUrls = await Promise.all(
             newImages.map(async (img) => {

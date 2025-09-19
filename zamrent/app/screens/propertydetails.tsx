@@ -71,33 +71,39 @@ export default function PropertyDetailsScreen() {
 
         {/* Property Info */}
         <View style={styles.card}>
-          <Text style={styles.title}>{propertyData.title}</Text>
+          <Text style={styles.price}>{propertyData.title}</Text>
           <Text style={styles.price}>K{propertyData.price}</Text>
 
-          <Text style={styles.description}>
+          <Text style={styles.price}>
             {propertyData.description || "No description available."}
           </Text>
 
-          <Text style={styles.description}>
+          <Text style={styles.price}>
             location: {propertyData.location || "No location provided."}
           </Text>
 
             {propertyData.bathrooms? 
-                 <Text style={styles.description}>Bathrooms {propertyData.bathrooms}</Text> : 
+                 <Text style={styles.price}>Bathrooms {propertyData.bathrooms}</Text> : 
                ""
              }
 
           {propertyData.type === "house" ? (
                                   propertyData.status ? (
-                                    <Text style={{ color: "red", fontSize: 19 }}>Rented</Text>
+                                    <Text style={{ color: "red", fontSize: 20 }}>Rented</Text>
                                   ) : (
                                     <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
                                   )
                                 ) : propertyData.type === "boardinghouse" ? (
-                                  <Text style={{ fontSize: 15 }}>
+                                  <Text style={{ fontSize: 20 }}>
                                     Bedspaces available: {propertyData.bedspaces_available}
                                   </Text>
                     ) : null}
+
+            {propertyData.distance ? (
+                <Text style={{ fontSize: 19, color: "black" }}>
+                  Approximately {propertyData.distance.toFixed(2)} km away from where you are
+                </Text>
+              ) : null}
 
         </View>
 
@@ -166,7 +172,7 @@ const styles = StyleSheet.create({
   },
 
   title: { fontSize: 17, fontWeight: "bold", marginBottom: 5 },
-  price: { fontSize: 20, color: "black", marginBottom: 0 },
+  price: { fontSize: 21, color: "black", marginBottom: 0 },
   sectionHeader: { fontSize: 18, fontWeight: "600", marginTop: 10 },
   description: { fontSize: 20, marginTop: 5 , fontWeight:"500"},
 

@@ -118,10 +118,10 @@ export default function Results() {
                 </Swiper>
 
                 {/* Property Details */}
-                <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
+                <Text style={{ fontSize: 19, color:"black", marginTop: 10 }}>
                   {item.title}
                 </Text>
-                 <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
+                 <Text style={{ fontSize: 19, color:"black", marginTop: 0 }}>
                   location: {item.location}
                 </Text>
                 <Text style={{ fontSize: 16, color: "black" }}>K{item.price}</Text>
@@ -132,10 +132,16 @@ export default function Results() {
                             <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
                           )
                         ) : item.type === "boardinghouse" ? (
-                          <Text style={{ fontSize: 15 }}>
+                          <Text style={{ fontSize: 19 }}>
                             Bedspaces available: {item.bedspaces_available}
                           </Text>
                    ) : null}
+
+                    {item.distance ? (
+                        <Text style={{ fontSize: 19, color: "black" }}>
+                          Approximately {item.distance.toFixed(2)} km away from where you are
+                        </Text>
+                      ) : null}
 
               </View>
             </TouchableOpacity>

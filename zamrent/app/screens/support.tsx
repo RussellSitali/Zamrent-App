@@ -5,15 +5,15 @@ export default function SupportScreen() {
   const router = useRouter();
 
   const handleCall = () => {
-    Linking.openURL("tel:+260900000000");
+    Linking.openURL("tel:+260970337049");
   };
 
   const handleEmail = () => {
-    Linking.openURL("mailto:support@zamrent.com");
+    Linking.openURL("mailto:support@zamrent.com"); // not real email big man
   };
 
   const handleWhatsApp = () => {
-    const phoneNumber = "+260900000000";
+    const phoneNumber = "+260570003287";
     Linking.openURL(`https://wa.me/${phoneNumber}`);
   };
 

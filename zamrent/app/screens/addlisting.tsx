@@ -85,7 +85,6 @@ export default function AddListing() {
     console.log("These are the assests ",result.assets)
   };
 
-  console.log("Here are the images ", images);
 
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
@@ -108,8 +107,8 @@ export default function AddListing() {
         return;
       }
 
-      if (images.length !== 1) {
-        setError("Please upload exactly 1 image");
+      if (images.length !== 7) {
+        setError("Please upload exactly 7 image");
         setLoading(false);
         return;
       }
