@@ -15,7 +15,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
-
+  
     const fetchUserListings = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken"); 
@@ -77,7 +77,7 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ beds }),
+        body: JSON.stringify({  beds: parseInt(beds, 10) }),
       });
 
       const data = await res.json();

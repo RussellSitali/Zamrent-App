@@ -118,30 +118,38 @@ export default function Results() {
                 </Swiper>
 
                 {/* Property Details */}
-                <Text style={{ fontSize: 19, color:"black", marginTop: 10 }}>
+                <Text style={{ fontSize: 20, color:"black", marginTop: 10 }}>
                   {item.title}
                 </Text>
-                 <Text style={{ fontSize: 19, color:"black", marginTop: 0 }}>
+                 <Text style={{ fontSize: 20, color:"black", marginTop: 0 }}>
                   location: {item.location}
                 </Text>
-                <Text style={{ fontSize: 16, color: "black" }}>K{item.price}</Text>
+                <Text style={{ fontSize: 20, color: "black" }}>K{item.price}</Text>
                {item.type === "house" ? (
                           item.status ? (
-                            <Text style={{ color: "red", fontSize: 19 }}>Rented</Text>
+                            <Text style={{ color: "red", fontSize: 20 }}>Rented</Text>
                           ) : (
                             <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
                           )
                         ) : item.type === "boardinghouse" ? (
-                          <Text style={{ fontSize: 19 }}>
+                          <Text style={{ fontSize: 20 }}>
                             Bedspaces available: {item.bedspaces_available}
                           </Text>
                    ) : null}
 
-                    {item.distance ? (
-                        <Text style={{ fontSize: 19, color: "black" }}>
-                          Approximately {item.distance.toFixed(2)} km away from where you are
-                        </Text>
-                      ) : null}
+                   {item.bedrooms? (
+                    <Text>{item.bedrooms} bedrooms</Text>
+                   ):(
+                    <Text> </Text>
+                   )}
+
+            {item.distance !== undefined && (
+              <Text style={{ fontSize: 20, color: "black" }}>
+                {item.distance < 0.5
+                  ? `Approximately ${(item.distance * 1000).toFixed(0)} meters away from where you are`
+                  : `Approximately ${item.distance.toFixed(2)} km away from where you are`}
+              </Text>
+            )}
 
               </View>
             </TouchableOpacity>

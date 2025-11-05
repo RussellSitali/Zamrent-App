@@ -83,7 +83,7 @@ export default function Profile() {
           <Text style={styles.sectionTitle}>Personal Information</Text>
           <Text style={styles.infoText}>Name: {user?.name}</Text>
           <Text style={styles.infoText}>Email: {user?.email}</Text>
-          <Text style={styles.infoText}>Phone: {user?.phone || "N/A"}</Text>
+          <Text style={styles.infoText}>Phone: {user?.phone_number || "N/A"}</Text>
           <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
             <Text style={styles.buttonText}>Edit Profile</Text>
           </TouchableOpacity>
@@ -100,22 +100,6 @@ export default function Profile() {
               <Text style={styles.buttonText}>Pay Listing Fee</Text>
             </TouchableOpacity>
           )}
-        </View>
-
-        {/* Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Property Summary</Text>
-          <Text style={styles.infoText}>Total Houses: {info.houses.length}</Text>
-          <Text style={styles.infoText}>
-            Total Boarding Houses: {info.boarding_houses.length}
-          </Text>
-          <Text style={styles.infoText}>
-            Total Bed Spaces:{" "}
-            {info.boarding_houses.reduce(
-              (sum, bh) => sum + (bh.bed_spaces || 0),
-              0
-            )}
-          </Text>
         </View>
 
         {/* Settings */}

@@ -72,7 +72,6 @@ export default function PropertyDetailsScreen() {
         {/* Property Info */}
         <View style={styles.card}>
           <Text style={styles.price}>{propertyData.title}</Text>
-          <Text style={styles.price}>K{propertyData.price}</Text>
 
           <Text style={styles.price}>
             {propertyData.description || "No description available."}
@@ -82,10 +81,18 @@ export default function PropertyDetailsScreen() {
             location: {propertyData.location || "No location provided."}
           </Text>
 
+           <Text style={styles.price}>K{propertyData.price}</Text>
+
             {propertyData.bathrooms? 
                  <Text style={styles.price}>Bathrooms {propertyData.bathrooms}</Text> : 
                ""
              }
+
+              {propertyData.bedrooms? (
+                <Text>{propertyData.bedrooms} bedrooms</Text>
+              ):(
+                <Text> </Text>
+              )}
 
           {propertyData.type === "house" ? (
                                   propertyData.status ? (
@@ -98,6 +105,7 @@ export default function PropertyDetailsScreen() {
                                     Bedspaces available: {propertyData.bedspaces_available}
                                   </Text>
                     ) : null}
+
 
             {propertyData.distance ? (
                 <Text style={{ fontSize: 19, color: "black" }}>

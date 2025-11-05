@@ -274,7 +274,7 @@ export default function EditHouse() {
         </View>
 
         <TouchableOpacity style={styles.buttonSecondary} onPress={pickImages}>
-          <Text style={styles.buttonText}>Upload 3 New Images (optional)</Text>
+          <Text style={styles.buttonText}>Upload 7 New Images (optional)</Text>
         </TouchableOpacity>
 
         {newImages.length > 0 && (
