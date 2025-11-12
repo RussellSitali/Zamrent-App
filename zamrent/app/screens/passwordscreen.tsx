@@ -18,7 +18,7 @@ export default function ResetPasswordScreen() {
     }
 
     try {
-      const res = await fetch(`${baseURL}/api/resetpassword/complete`, {
+      const res = await fetch(`${baseURL}/api/auth/resetpassword/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: password }),

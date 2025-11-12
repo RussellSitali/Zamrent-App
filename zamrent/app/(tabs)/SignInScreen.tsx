@@ -123,7 +123,9 @@ export default function Login() {
             <TouchableOpacity
             style={{marginTop:13,}}
             onPress={resetpassword}>
-              Forgot password?
+              <Text>
+                Forgot password?
+              </Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>

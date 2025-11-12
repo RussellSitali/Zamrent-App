@@ -6,6 +6,7 @@ import { router } from "expo-router";
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [info, setInfo] = useState("");
 
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,13 +19,15 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
 
-      const response = await fetch(`${baseURL}/api/forgotpassword`, {
+      const response = await fetch(`${baseURL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      setEmail("")
 
       const data = await response.json();
+      setInfo(data.message);
 
       if (response.ok) {
         Alert.alert("Success", "If this email is registered, you’ll receive reset instructions.");
@@ -40,6 +43,11 @@ export default function ForgotPasswordScreen() {
 
   return (
     <View style={styles.container}>
+       {/* 🔙 Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Forgot Password</Text>
       <Text style={styles.subtitle}>Enter your email address to reset your password.</Text>
 
@@ -59,6 +67,10 @@ export default function ForgotPasswordScreen() {
       >
         <Text style={styles.buttonText}>{loading ? "Sending..." : "Send Reset Link"}</Text>
       </TouchableOpacity>
+
+      <Text>
+        {info}
+      </Text>
 
     </View>
   );
@@ -100,5 +112,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+    backText: {
+    color: "#007bff",
+    fontSize: 16,
+  },
+    backButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    padding: 8,
   },
 });

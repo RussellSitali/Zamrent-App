@@ -4,7 +4,7 @@
     "slug": "zamrent",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/zamrent1.png",
+    "icon": "./assets/images/zamrent33.png",
     "scheme": "zamrent",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/zamrent1.png",
+        "foregroundImage": "./assets/images/zamrent33.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -22,14 +22,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/zamrent1.png"
+      "favicon": "./assets/images/zamrent33.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/zamrent1.png",
+          "image": "./assets/images/zamrent33.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -41,7 +41,17 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "linking": {
+          "prefixes": ["https://zamrent.page.link", "zamrent://"],
+          "config": {
+            "screens": {
+              "reset": "reset",
+              "verify": "verify-email"
+            }
+          }
+        }
+      },
       "eas": {
         "projectId": "7f312cf1-3a74-4ab5-9c61-f894852eeec1"
       }
