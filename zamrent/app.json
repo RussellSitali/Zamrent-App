@@ -46,8 +46,8 @@
           "prefixes": ["https://zamrent.page.link", "zamrent://"],
           "config": {
             "screens": {
-              "reset": "reset",
-              "verify": "verify-email"
+              "passwordscreen": "passwordscreen",
+              "verifyemail": "verifyEmailScreen"
             }
           }
         }
