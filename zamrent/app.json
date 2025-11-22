@@ -43,7 +43,7 @@
     "extra": {
       "router": {
         "linking": {
-          "prefixes": ["https://zamrent.page.link", "zamrent://"],
+          "prefixes": ["zamrent://"],
           "config": {
             "screens": {
               "passwordscreen": "passwordscreen",
