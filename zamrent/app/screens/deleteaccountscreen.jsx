@@ -28,7 +28,7 @@ export default function DeleteScreen() {
 
         <TouchableOpacity
           style={styles.yesBtn}
-          onPress={() => router.push("/confirm-delete")} // <-- navigate to password screen
+          onPress={() => router.push("/screens/confirmdeleteaccount")}
         >
           <Text style={styles.yesText}>Yes, Delete</Text>
         </TouchableOpacity>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
 
   warning: {
-    fontSize: 14,
+    fontSize: 20,
     color: "red",
     textAlign: "center",
     marginBottom: 40,

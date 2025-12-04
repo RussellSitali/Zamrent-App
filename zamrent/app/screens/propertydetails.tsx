@@ -194,3 +194,6 @@ const styles = StyleSheet.create({
   },
   contactText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
+
+
+

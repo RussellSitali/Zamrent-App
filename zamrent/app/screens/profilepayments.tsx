@@ -65,7 +65,7 @@ export default function Profile() {
   const handlePayment = () => router.push("/screens/payment");
   const handleChangePassword = () => router.push("/screens/changepassword");
   const handleSupport = () => router.push("/screens/support");
-  const handleDelete = () => router.push("/");
+  const handleDelete = () => router.push("/screens/deleteaccountscreen");
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("userToken");
@@ -112,7 +112,7 @@ export default function Profile() {
           <TouchableOpacity style={styles.button} onPress={handleSupport}>
             <Text style={styles.buttonText}>Contact Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleDelete}>
             <Text style={styles.buttonText}>Delete Account</Text>
           </TouchableOpacity>
         </View>

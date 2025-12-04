@@ -15,16 +15,21 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState({ houses: [], boarding_houses: [] });
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
+
   
-    const fetchUserListings = async () => {
+  const fetchUserListings = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken"); 
+
       if (!token) {
-        router.replace("/(tabs)/SignInScreen"); 
+        setAuthChecked(true); 
+        router.replace("/(tabs)/SignInScreen");
         return;
       }
 
       setLoading(true);
+
       const storedUser = await AsyncStorage.getItem("userInfo");
       setUser(storedUser ? JSON.parse(storedUser) : null);
 
@@ -39,8 +44,10 @@ export default function Profile() {
       router.replace("/(tabs)/SignInScreen");
     } finally {
       setLoading(false);
+      setAuthChecked(true); 
     }
-  };
+};
+
 
 
   const changeStatus = async (houseId, currentStatus) => {

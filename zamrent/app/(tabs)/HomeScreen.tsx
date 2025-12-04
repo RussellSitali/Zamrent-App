@@ -27,6 +27,9 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
+  const [logoTapCount, setLogoTapCount] = useState(0);
+  const [lastTapTime, setLastTapTime] = useState(0);
+
 
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
@@ -41,6 +44,21 @@ export default function HomeScreen() {
       setPrice("");
       setError("");
     }
+
+    const handleLogoTap = () => {
+      const now = Date.now();
+      if (now - lastTapTime > 2000) { // Reset if more than 2 sec since last tap
+        setLogoTapCount(1);
+      } else {
+        setLogoTapCount(prev => prev + 1);
+      }
+      setLastTapTime(now);
+
+      if (logoTapCount + 1 === 13) {
+        router.push("/screens/adminloginscreen"); // Navigate to admin login
+        setLogoTapCount(0); // reset
+      }
+    };
 
 useFocusEffect(
       useCallback(() => {
@@ -157,7 +175,10 @@ useFocusEffect(
         <View style={styles.inner}>
           {/* Top Section */}
           <View style={styles.topsection}>
-            <Text style={styles.header}>ZamRent 🏠</Text>
+            <TouchableOpacity onPress={handleLogoTap}>
+              <Text style={styles.header}>ZamRent 🏠</Text>
+            </TouchableOpacity>
+
             <Text style={styles.subheader}>
               Easily find and list rental properties across Zambia
             </Text>
