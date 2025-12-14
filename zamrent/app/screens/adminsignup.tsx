@@ -1,7 +1,5 @@
-
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import React, { useState } from "react";
-import axios from "axios";
 import { router } from "expo-router";
 
 export default function AdminSignupScreen() {
@@ -12,32 +10,47 @@ export default function AdminSignupScreen() {
   const [adminCode, setAdminCode] = useState("");
   const [adminPass, setAdminPass] = useState("");
 
-    const baseURL = process.env.EXPO_PUBLIC_API_URL;
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
   const handleAdminSignup = async () => {
     if (!username || !email || !password || !confirmPassword || !adminCode || !adminPass) {
-      return Alert.alert("Error", "Please fill in all fields");
+      Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
     if (password !== confirmPassword) {
-      return Alert.alert("Error", "Passwords do not match");
+      Alert.alert("Error", "Passwords do not match");
+      return;
     }
 
     try {
-      const res = await axios.post(`${baseURL}/api/admin/signup`, {
-        username,
-        email,
-        password,
-        adminCode,
-        adminPass,
+      const res = await fetch(`${baseURL}/api/admin/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          confirmPassword,
+          adminCode,
+          adminPass,
+        }),
       });
 
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
       Alert.alert("Success", "Admin account created successfully");
-      router.push('/screens/adminloginscreen');
-      
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Signup Failed", err.response?.data?.message || "Something went wrong");
+      router.push("/screens/adminloginscreen");
+
+    } catch (error: any) {
+      console.log("Signup error:", error.message);
+      Alert.alert("Signup Failed", error.message);
     }
   };
 
@@ -55,7 +68,8 @@ export default function AdminSignupScreen() {
 
       <TextInput
         style={styles.input}
-        placeholder="Default Admin Email"
+        placeholder="Admin Email"
+        secureTextEntry
         value={email}
         onChangeText={setEmail}
         placeholderTextColor="#888"
@@ -82,6 +96,7 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Admin Code"
+        secureTextEntry
         value={adminCode}
         onChangeText={setAdminCode}
         placeholderTextColor="#888"
@@ -90,6 +105,7 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Admin Pass"
+        secureTextEntry
         value={adminPass}
         onChangeText={setAdminPass}
         placeholderTextColor="#888"

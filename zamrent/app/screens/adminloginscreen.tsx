@@ -2,10 +2,12 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AdminLoginScreen() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [secretpass, setSecretpass] = useState("");
 
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
@@ -15,19 +17,17 @@ export default function AdminLoginScreen() {
     router.push('/screens/adminsignup');
   }
 
-    const handleAdminLogin = async () => {
-      if (!email || !password) {
-        alert("Please enter both email and password");
+  const handleAdminLogin = async () => {
+      if (!username || !password || !secretpass) {
+        alert("Please enter all fields");
         return;
       }
 
       try {
         const response = await fetch(`${baseURL}/api/admin/login`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username: email, password }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, secretpass }),
         });
 
         const data = await response.json();
@@ -37,11 +37,15 @@ export default function AdminLoginScreen() {
           return;
         }
 
-        alert("Admin login successful");
-        console.log("TOKEN:", data.token);
+        // Save token and other details
+        await AsyncStorage.setItem("adminToken", data.token);
+        await AsyncStorage.setItem("adminId", String(data.adminId));
+        await AsyncStorage.setItem("role", data.role);
 
-        // TODO: navigate to admin dashboard
-        // router.push("/admin/dashboard");
+        alert("Admin login successful");
+
+        // Navigate to dashboard
+        router.replace("/screens/admindashboard");
 
       } catch (error) {
         console.error("Admin login error:", error);
@@ -49,16 +53,15 @@ export default function AdminLoginScreen() {
       }
     };
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Login</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Admin Email"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="User name"
+        value={username}
+        onChangeText={setUsername}
         placeholderTextColor="#888"
       />
 
@@ -68,6 +71,15 @@ export default function AdminLoginScreen() {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        placeholderTextColor="#888"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Secret pass"
+        secureTextEntry
+        value={secretpass}
+        onChangeText={setSecretpass}
         placeholderTextColor="#888"
       />
 
