@@ -73,6 +73,11 @@ export default function Profile() {
     router.replace("/(tabs)/HomeScreen");
   };
 
+  const handleVerify = () =>{
+    router.push("/screens/verifyaccount1");
+    console.log("verify was pressed");
+  }
+
   return (
     <CustomDrawer>
       <Stack.Screen options={{ headerShown: false }} />
@@ -112,7 +117,10 @@ export default function Profile() {
           <TouchableOpacity style={styles.button} onPress={handleSupport}>
             <Text style={styles.buttonText}>Contact Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleDelete}>
+          <TouchableOpacity style={styles.button} onPress={handleVerify}>
+            <Text style={styles.buttonText}>Verify Account</Text>
+          </TouchableOpacity>
+           <TouchableOpacity style={styles.button} onPress={handleDelete}>
             <Text style={styles.buttonText}>Delete Account</Text>
           </TouchableOpacity>
         </View>
