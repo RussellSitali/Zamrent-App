@@ -82,9 +82,8 @@ export default function AddListing() {
       setImages((prev) => [...prev, ...result.assets]);
     }
 
-    console.log("These are the assests ",result.assets)
+    console.log("These are the assests", result.assets)
   };
-
 
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));

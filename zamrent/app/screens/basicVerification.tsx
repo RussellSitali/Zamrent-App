@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Image
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -15,104 +16,100 @@ export default function BasicVerificationScreen() {
   const router = useRouter();
 
   const [airtelNumber, setAirtelNumber] = useState("");
-  const [idFront, setIdFront] = useState(null);
-  const [idBack, setIdBack] = useState(null);
-  const [selfieFront, setSelfieFront] = useState(null);
-  const [selfieBack, setSelfieBack] = useState(null);
-  const [propertyPics, setPropertyPics] = useState([null, null, null]);
+  const [images, setImages] = useState([]); 
 
-  const pickImage = async (setter) => {
-   const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images, 
-        allowsMultipleSelection: true,
-        quality: 1,
-    });
-
-
-    if (!result.canceled) {
-      setter(result.assets[0]);
-    }
-  };
-
-  const pickPropertyImage = async (index) => {
+  const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
       quality: 1,
-    });
-
+  });
     if (!result.canceled) {
-      const updated = [...propertyPics];
-      updated[index] = result.assets[0];
-      setPropertyPics(updated);
+      setImages((prev) => [...prev, ...result.assets]);
+    }
+      console.log("These are the assests ", result.assets)
+    }
+
+     const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!airtelNumber) {
+      Alert.alert("Error", "Please enter your Airtel Money number");
+      return;
+    }
+
+    if (images.length !== 7) {
+      Alert.alert(
+        "Error",
+        "Please upload exactly 7 photos:\n2 ID/NRC, 2 Selfies, 3 Property photos"
+      );
+      return;
+    }
+
+    console.log("Airtel Number:", airtelNumber);
+
+    try {
+      const uploadedImages = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+
+        const response = await fetch(img.uri);
+        const blob = await response.blob();
+
+        const formData = new FormData();
+        formData.append("file", blob);
+        formData.append("upload_preset", "zamrent");
+
+        const cloudRes = await fetch(
+          "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await cloudRes.json();
+        console.log(data);
+
+        if (!cloudRes.ok) {
+          console.log("Cloudinary error response:", data);
+          throw new Error(data.error?.message || "Cloudinary upload failed");
+        }
+
+        uploadedImages.push({
+          url: data.secure_url,
+          public_id: data.public_id,
+        });
+      }
+
+      console.log("Uploaded verification images:", uploadedImages);
+
+      Alert.alert(
+        "Submitted",
+        "Verification submitted successfully. Status: Pending review."
+      );
+
+      router.back();
+    } catch (err) {
+      console.error("Upload error:", err);
+      Alert.alert("Upload Failed", err.message);
     }
   };
 
-    const handleSubmit = async () => {
-        if (!airtelNumber) {
-            Alert.alert("Error", "Please enter your Airtel Money number");
-            return;
-        }
-
-        console.log("Airtel Money Number submitted:", airtelNumber);
-
-        try {
-            const uploadedImages = [];
-
-            // Collect all images
-            const allImages = [
-            { label: "ID Front", image: idFront },
-            { label: "ID Back", image: idBack },
-            { label: "Selfie Front", image: selfieFront },
-            { label: "Selfie Back", image: selfieBack },
-            ...propertyPics.map((img, idx) => ({ label: `Property ${idx + 1}`, image: img })),
-            ];
-
-            for (const item of allImages) {
-            if (!item.image?.uri) continue;
-
-            const formData = new FormData();
-            formData.append("file", {
-                uri: item.image.uri,
-                type: "image/jpeg",
-                name: `${item.label.replace(" ", "_")}_${Date.now()}.jpg`,
-            });
-            formData.append("upload_preset", "zamrent");
-
-            const cloudRes = await fetch(
-                "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-                { method: "POST", body: formData }
-            );
-            const data = await cloudRes.json();
-
-            if (!cloudRes.ok) {
-                throw new Error(data.error?.message || "Cloudinary upload failed");
-            }
-
-            uploadedImages.push({
-                label: item.label,
-                url: data.secure_url,
-                public_id: data.public_id,
-            });
-            }
-
-            console.log("Uploaded images from Cloudinary:", uploadedImages);
-
-            Alert.alert(
-            "Success",
-            "Airtel number logged. Images uploaded to Cloudinary and URLs logged in console."
-            );
-            router.back(); // optional navigation
-        } catch (err) {
-            console.error("Error uploading images:", err);
-            Alert.alert("Upload Failed", err.message);
-        }
-        };
-
-
-  return (
+    return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Basic Verification</Text>
       <Text style={styles.fee}>Fee: K35 (Airtel Money only)</Text>
+
+      <Text style={styles.instructions}>
+        Please upload exactly 7 clear photos:
+        {"\n"}2: ID or NRC (Front & Back)
+        {"\n"}2: Selfies holding ID/NRC(front and back)
+        {"\n"}3: Property photos
+      </Text>
 
       <Text style={styles.label}>Airtel Money Number</Text>
       <TextInput
@@ -123,69 +120,69 @@ export default function BasicVerificationScreen() {
         onChangeText={setAirtelNumber}
       />
 
-      <Text style={styles.label}>Upload ID (Front & Back)</Text>
-      <View style={styles.uploadRow}>
-        <TouchableOpacity style={styles.uploadButton} onPress={() => pickImage(setIdFront)}>
-          <Text>ID Front</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.uploadButton} onPress={() => pickImage(setIdBack)}>
-          <Text>ID Back</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.uploadButton} onPress={pickImages}>
+        <Text style={styles.uploadText}>
+          {images.length > 0
+            ? `${images.length} photos selected`
+            : "Select 7 Photos"}
+        </Text>
+      </TouchableOpacity>
 
-      <Text style={styles.label}>Selfie with ID (Front & Back)</Text>
-      <View style={styles.uploadRow}>
-        <TouchableOpacity style={styles.uploadButton} onPress={() => pickImage(setSelfieFront)}>
-          <Text>Selfie Front</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.uploadButton} onPress={() => pickImage(setSelfieBack)}>
-          <Text>Selfie Back</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.label}>Property Photos (3)</Text>
-      <View style={styles.uploadRow}>
-        {propertyPics.map((pic, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.uploadButton}
-            onPress={() => pickPropertyImage(index)}
-          >
-            <Text>{pic ? "Uploaded" : `Photo ${index + 1}`}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      
+                {images.length > 0 && (
+                  <View style={styles.imagePreviewContainer}>
+                    {images.map((img, index) => (
+                      <View key={index} style={{ position: "relative", marginRight: 10 }}>
+                        <Image source={{ uri: img.uri }} style={styles.imagePreview} />
+                        <TouchableOpacity
+                          style={styles.removeImageButton}
+                          onPress={() => removeImage(index)}
+                        >
+                          <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+      
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Submit</Text>
+        <Text style={styles.submitText}>Submit Verification</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
+ container: {
     padding: 20,
     backgroundColor: "#f5f5f5",
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   fee: {
     textAlign: "center",
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 12,
     color: "#2a2a72",
     fontWeight: "600",
+  },
+  instructions: {
+    fontSize: 14,
+    marginBottom: 15,
+    color: "#444",
+    backgroundColor: "#eaeaea",
+    padding: 12,
+    borderRadius: 8,
   },
   label: {
     fontSize: 16,
     fontWeight: "600",
-    marginVertical: 8,
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
@@ -193,30 +190,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     backgroundColor: "#fff",
-  },
-  uploadRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 15,
   },
   uploadButton: {
-    flex: 1,
-    padding: 12,
     backgroundColor: "#ddd",
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 10,
     alignItems: "center",
-    marginHorizontal: 5,
+    marginBottom: 20,
+  },
+  uploadText: {
+    fontWeight: "600",
   },
   submitButton: {
     backgroundColor: "#2a2a72",
-    paddingVertical: 14,
+    padding: 15,
     borderRadius: 12,
     alignItems: "center",
-    marginTop: 20,
   },
   submitText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
   },
-});
+  removeImageButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "red",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imagePreviewContainer: {
+    flexDirection: "row",
+    marginVertical: 10,
+    flexWrap: "wrap",
+  },
+  imagePreview: { width: 100, height: 100, borderRadius: 5 },
+})

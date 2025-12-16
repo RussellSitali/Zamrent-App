@@ -38,10 +38,10 @@ export default function Profile() {
 
           // Fetch listings summary here if needed
           // Placeholder data
-          setInfo({
-            houses: [{ id: 1 }, { id: 2 }],
-            boarding_houses: [{ id: 1, bed_spaces: 5 }],
-          });
+          // setInfo({
+          //   houses: [{ id: 1 }, { id: 2 }],
+          //   boarding_houses: [{ id: 1, bed_spaces: 5 }],
+          // });
         } catch (err) {
           console.error("Error fetching profile data", err);
         } finally {
