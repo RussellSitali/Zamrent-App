@@ -106,8 +106,8 @@ export default function AddListing() {
         return;
       }
 
-      if (images.length !== 7) {
-        setError("Please upload exactly 7 image");
+      if (images.length !== 3) {
+        setError("Please upload exactly 3 image");
         setLoading(false);
         return;
       }
@@ -125,15 +125,13 @@ export default function AddListing() {
       console.log("This is the img",img);
       console.log("This is the img uri: ", img.uri);
 
-      const formData = new FormData();
-      formData.append("file", {
-        uri: img.uri,
-        type: "image/jpeg",
-        name: `listing_${Date.now()}.jpg`,
-      });
-      formData.append("upload_preset", "zamrent"); 
+   // Fetch the image as a blob (works for both mobile and web)
+      const response = await fetch(img.uri);
+      const blob = await response.blob();
 
-      console.log("This is the formdata we are sending ", formData);
+      const formData = new FormData();
+      formData.append("file", blob);
+      formData.append("upload_preset", "zamrent");
 
       const cloudResponse = await fetch(
         "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",

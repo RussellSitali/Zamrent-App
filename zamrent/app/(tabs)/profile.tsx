@@ -125,6 +125,8 @@ export default function Profile() {
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const rentStatus = item.status ? "Rented" : "Available";
 
+    console.log("These are the images",item.images)
+
     return (
       <View style={styles.listItem}>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>

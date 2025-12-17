@@ -112,8 +112,8 @@ export default function EditBoardingHouse() {
 
     if (!result.canceled) {
       const picked = result.assets;
-      if (picked.length !== 7) {
-        alert("Please select exactly 7 images.");
+      if (picked.length !== 3) {
+        alert("Please select exactly 3 images.");
         return;
       }
       setNewImages(picked);
@@ -144,42 +144,52 @@ export default function EditBoardingHouse() {
       };
 
       // If new images were selected, upload them first
-      if (newImages.length === 7) {
-        const uploadedImages = [];
+if (newImages.length === 3) {
+  const uploadedImages = [];
 
-        for (const img of newImages) {
-          const formData = new FormData();
-          formData.append("file", {
-            uri: img.uri,
-            type: "image/jpeg", // adjust if needed
-            name: "boardinghouse.jpg",
-          });
-          formData.append("upload_preset", "zamrent");
-          formData.append("folder", "zamrent_listings");
+  for (const img of newImages) {
+    if (!img.uri) {
+      console.warn("Skipping image, no uri:", img);
+      continue;
+    }
 
-          const cloudRes = await fetch(
-            "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
+      // Fetch image as blob (web + mobile compatible)
+      const response = await fetch(img.uri);
+      const blob = await response.blob();
 
-          const cloudData = await cloudRes.json();
-          if (!cloudData.secure_url) throw new Error("Cloudinary upload failed");
+      const formData = new FormData();
+      formData.append("file", blob);
+      formData.append("upload_preset", "zamrent");
 
-          uploadedImages.push({
-            url: cloudData.secure_url,
-            public_id: cloudData.public_id,
-          });
+      const cloudResponse = await fetch(
+        "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+        {
+          method: "POST",
+          body: formData,
         }
+      );
 
-        payload.images = uploadedImages;
+      const data = await cloudResponse.json();
+
+      if (!cloudResponse.ok || !data.secure_url) {
+        throw new Error(data.error?.message || "Cloudinary upload failed");
       }
+
+      uploadedImages.push({
+        image_url: data.secure_url,   
+        public_id: data.public_id,
+      });
+    }
+
+    // attach to payload sent to backend
+    payload.images = uploadedImages;
+    console.log(payload.images, "These are the payload images");
+  }
+
 
       // Update listing in backend
       const res = await axios.patch(
-        `http://localhost:5000/api/property/boardinghouse/${propertyId}`,
+        `http://localhost:5000/api/property/updateboardinghouse/${propertyId}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
