@@ -118,31 +118,38 @@ export default function EditHouse() {
     }
   };
 
-  // Upload to Cloudinary
-  const uploadToCloudinary = async (image) => {
-    const formData = new FormData();
-    formData.append("file", {
-      uri: image.uri,
-      type: "image/jpeg",
-      name: "upload.jpg",
-    });
-    formData.append("upload_preset", "zamrent");
+  // Upload to Cloudinary (blob-safe)
+const uploadToCloudinary = async (image) => {
+  if (!image.uri) throw new Error("Image URI is missing");
 
-    const res = await axios.post(
-      "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+        // Fetch the image as a blob (works on mobile + web)
+        const response = await fetch(image.uri);
+        const blob = await response.blob();
 
-    return { url: res.data.secure_url, public_id: res.data.public_id };
-  };
+        const formData = new FormData();
+        formData.append("file", blob);
+        formData.append("upload_preset", "zamrent");
 
-  // Extract Cloudinary public_id from URL
-  const extractPublicId = (url) => {
-    const parts = url.split("/upload/")[1];
-    const withoutVersion = parts.split("/").slice(1).join("/");
-    return withoutVersion.split(".")[0];
-  };
+        const cloudRes = await fetch(
+          "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await cloudRes.json();
+
+        if (!cloudRes.ok || !data.secure_url) {
+          throw new Error(data.error?.message || "Cloudinary upload failed");
+        }
+
+        return {
+          image_url: data.secure_url, // ✅ matches backend expectation
+          public_id: data.public_id,
+        };
+      };
+
 
   // Submit updated house
     const handleSubmit = async () => {
