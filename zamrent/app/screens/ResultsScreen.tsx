@@ -120,27 +120,27 @@ export default function Results() {
                 </Swiper>
 
                 {/* Property Details */}
-                <Text style={{ fontSize: 20, color:"black", marginTop: 10 }}>
+                <Text style={{ fontSize: 20, color:"black",fontWeight:"900", marginTop: 10 }}>
                   {item.title}
                 </Text>
-                 <Text style={{ fontSize: 20, color:"black", marginTop: 0 }}>
-                  location: {item.location}
+                 <Text style={{ fontSize: 20, color:"grey",fontWeight:"600" }}>
+                  {item.location}
                 </Text>
-                <Text style={{ fontSize: 20, color: "black" }}>K{item.price}</Text>
+                <Text style={{ fontSize: 20, color: "red", marginTop: 10, fontWeight:"600"  }}>K{item.price}/month</Text>
                {item.type === "house" ? (
                           item.status ? (
-                            <Text style={{ color: "red", fontSize: 20 }}>Rented</Text>
+                            <Text style={{ color: "red", fontSize: 20,fontWeight:"600",marginTop: 10 }}>Rented</Text>
                           ) : (
-                            <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
+                            <Text style={{ color: "green", fontSize: 20, fontWeight:"600" ,marginTop: 10 }}>Available</Text>
                           )
                         ) : item.type === "boardinghouse" ? (
-                          <Text style={{ fontSize: 20 }}>
-                            Bedspaces available: {item.bedspaces_available}
+                          <Text style={{ fontSize: 20,fontWeight:"600",marginTop: 10 ,color:"black" }}>
+                            Bedspaces available: {item.bedspaces_available} 
                           </Text>
                    ) : null}
 
                    {item.bedrooms? (
-                    <Text>{item.bedrooms} bedrooms</Text>
+                    <Text style={{ color: "grey", fontSize: 20,fontWeight:"600",marginTop:1 }}>{item.bedrooms} bedrooms</Text>
                    ):(
                     <Text> </Text>
                    )}

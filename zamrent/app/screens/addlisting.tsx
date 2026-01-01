@@ -149,7 +149,7 @@ export default function AddListing() {
       }
 
       uploadedImages.push({
-        url: data.secure_url,
+        image_url: data.secure_url,
         public_id: data.public_id,
       });
     }

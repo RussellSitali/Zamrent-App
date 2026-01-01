@@ -81,7 +81,7 @@ export default function PropertyDetailsScreen() {
             location: {propertyData.location || "No location provided."}
           </Text>
 
-           <Text style={styles.price}>K{propertyData.price}</Text>
+           <Text style={styles.price}>k{propertyData.price}/month</Text>
 
             {propertyData.bathrooms? 
                  <Text style={styles.price}>Bathrooms {propertyData.bathrooms}</Text> : 
@@ -164,10 +164,10 @@ const styles = StyleSheet.create({
 
   image: {
     width: Dimensions.get("window").width - 40,
-    height: 250,
+    height: 200,
     borderRadius: 10,
     resizeMode: "cover",
-    marginBottom: 10,
+    marginBottom: 0,
   },
   noImage: {
     width: Dimensions.get("window").width - 40,
@@ -179,8 +179,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  title: { fontSize: 17, fontWeight: "bold", marginBottom: 5 },
-  price: { fontSize: 21, color: "black", marginBottom: 0 },
+  title: { fontSize: 17, fontWeight:"900", marginBottom: 5 },
+  price: { fontSize: 21, color: "black", marginBottom: 0, },
   sectionHeader: { fontSize: 18, fontWeight: "600", marginTop: 10 },
   description: { fontSize: 20, marginTop: 5 , fontWeight:"500"},
 

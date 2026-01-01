@@ -145,7 +145,7 @@ const uploadToCloudinary = async (image) => {
         }
 
         return {
-          image_url: data.secure_url, // ✅ matches backend expectation
+          image_url: data.secure_url, 
           public_id: data.public_id,
         };
       };
@@ -165,8 +165,7 @@ const uploadToCloudinary = async (image) => {
 
       let imageUrls = [];
 
-      // Upload new images if exactly 7 are selected
-      if (newImages.length === 7) {
+      if (newImages.length === 3) {
         try {
           imageUrls = await Promise.all(
             newImages.map(async (img) => {
@@ -190,7 +189,7 @@ const uploadToCloudinary = async (image) => {
         bedrooms: Number(form.bedrooms),
         latitude: form.latitude || null,
         longitude: form.longitude || null,
-        ...(imageUrls.length === 3 && { images: imageUrls }),
+        ...(imageUrls.length < 8 && { images: imageUrls }),
       };
 
       const res = await axios.patch(
@@ -281,7 +280,7 @@ const uploadToCloudinary = async (image) => {
         </View>
 
         <TouchableOpacity style={styles.buttonSecondary} onPress={pickImages}>
-          <Text style={styles.buttonText}>Upload 7 New Images (optional)</Text>
+          <Text style={styles.buttonText}>Upload New Images (optional)</Text>
         </TouchableOpacity>
 
         {newImages.length > 0 && (
