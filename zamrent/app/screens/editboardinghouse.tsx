@@ -102,7 +102,7 @@ export default function EditBoardingHouse() {
     }
   };
 
-  // Pick new images (must be 3)
+  // Pick new images
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -112,8 +112,8 @@ export default function EditBoardingHouse() {
 
     if (!result.canceled) {
       const picked = result.assets;
-      if (picked.length !== 3) {
-        alert("Please select exactly 3 images.");
+      if (picked.length > 7) {
+        alert("Upload upto 7 maximum images");
         return;
       }
       setNewImages(picked);
@@ -144,7 +144,7 @@ export default function EditBoardingHouse() {
       };
 
       // If new images were selected, upload them first
-if (newImages.length === 3) {
+if (newImages.length > 0) {
   const uploadedImages = [];
 
   for (const img of newImages) {

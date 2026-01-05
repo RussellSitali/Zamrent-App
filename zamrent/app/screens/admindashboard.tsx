@@ -1,12 +1,102 @@
-
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const router = useRouter();
 
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // =============================
+  // LIVE SEARCH WITH DEBOUNCE
+  // =============================
+  useEffect(() => {
+    if (!query || query.trim().length === 0) {
+      setResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchBackend(query);
+    }, 300); // debounce
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // =============================
+  // API CALLS (COMMENTED)
+  // =============================
+
+  /*
+  const searchBackend = async (text) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${API_URL}/admin/search?q=${text}`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      const data = await res.json();
+      setResults(data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  */
+
+  /*
+  const banUser = async (userId) => {
+    await fetch(`${API_URL}/admin/users/${userId}/ban`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+  };
+  */
+
+  /*
+  const unbanUser = async (userId) => {
+    await fetch(`${API_URL}/admin/users/${userId}/unban`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+  };
+  */
+
+  /*
+  const deleteUser = async (userId) => {
+    await fetch(`${API_URL}/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+  };
+  */
+
+  /*
+  const deleteListing = async (listingId) => {
+    await fetch(`${API_URL}/admin/listings/${listingId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+  };
+  */
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>ZamRent Admin</Text>
@@ -15,32 +105,58 @@ export default function AdminDashboard() {
         </TouchableOpacity>
       </View>
 
-      {/* Dashboard Cards */}
-      <View style={styles.cardsContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardNumber}>0</Text>
-          <Text style={styles.cardLabel}>Total Users</Text>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardNumber}>0</Text>
-          <Text style={styles.cardLabel}>Total Listings</Text>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardNumber}>0</Text>
-          <Text style={styles.cardLabel}>Active Listings</Text>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardNumber}>0</Text>
-          <Text style={styles.cardLabel}>Expired Listings</Text>
-        </View>
+      {/* Search Input */}
+      <View style={styles.searchBox}>
+        <TextInput
+          style={styles.input}
+          placeholder="Search listings, email, phone, location..."
+          value={query}
+          onChangeText={setQuery}
+        />
       </View>
 
-      {/* Coming Soon */}
-      <Text style={styles.comingSoon}>More admin features coming soon 🚧</Text>
-    </View>
+      {loading && <ActivityIndicator size="small" />}
+
+      {/* Results */}
+      {results.map((item) => (
+        <View key={item.listing_id} style={styles.card}>
+          {/* Listing Info */}
+          <Text style={styles.listingTitle}>{item.title}</Text>
+          <Text>Location: {item.location}</Text>
+          <Text>Status: {item.listing_status}</Text>
+
+          {/* User Info */}
+          <View style={styles.userInfo}>
+            <Text>User: {item.user_email}</Text>
+            <Text>Phone: {item.user_phone}</Text>
+            <Text>User Status: {item.user_status}</Text>
+          </View>
+
+          {/* Actions */}
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.deleteListingBtn}>
+              <Text style={styles.btnText}>Delete Listing</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.banBtn}>
+              <Text style={styles.btnText}>Ban User</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.unbanBtn}>
+              <Text style={styles.btnText}>Unban User</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.deleteUserBtn}>
+              <Text style={styles.btnText}>Delete User</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))}
+
+      {!loading && query.length > 0 && results.length === 0 && (
+        <Text style={styles.emptyText}>No results found</Text>
+      )}
+    </ScrollView>
   );
 }
 
@@ -53,8 +169,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   title: {
     fontSize: 22,
@@ -62,36 +177,67 @@ const styles = StyleSheet.create({
     color: "#2f95dc",
   },
   logout: {
-    fontSize: 16,
     color: "red",
     fontWeight: "600",
   },
-  cardsContainer: {
+  searchBox: {
+    marginBottom: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 12,
+  },
+  card: {
+    backgroundColor: "#f5f5f5",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 14,
+  },
+  listingTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  userInfo: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  actionsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    gap: 8,
   },
-  card: {
-    width: "48%",
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 16,
-    alignItems: "center",
+  deleteListingBtn: {
+    backgroundColor: "#d9534f",
+    padding: 8,
+    borderRadius: 6,
   },
-  cardNumber: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#2f95dc",
+  banBtn: {
+    backgroundColor: "#f0ad4e",
+    padding: 8,
+    borderRadius: 6,
   },
-  cardLabel: {
-    fontSize: 14,
-    marginTop: 6,
-    color: "#555",
+  unbanBtn: {
+    backgroundColor: "#5cb85c",
+    padding: 8,
+    borderRadius: 6,
   },
-  comingSoon: {
-    marginTop: 30,
+  deleteUserBtn: {
+    backgroundColor: "#b52b27",
+    padding: 8,
+    borderRadius: 6,
+  },
+  btnText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  emptyText: {
     textAlign: "center",
     color: "#999",
+    marginTop: 20,
   },
 });

@@ -69,49 +69,131 @@ export default function PropertyDetailsScreen() {
           </Swiper>
         </View>
 
-        {/* Property Info */}
+              {/* Property Info */}
         <View style={styles.card}>
-          <Text style={styles.price}>{propertyData.title}</Text>
 
-          <Text style={styles.price}>
+          {/* Title */}
+          <Text style={{ fontSize: 22, color: "black", fontWeight: "900" }}>
+            {propertyData.title}
+          </Text>
+
+          {/* Description */}
+        <Text
+            style={{
+              fontSize: 20, 
+              color: "grey", 
+              fontWeight: "600",
+              letterSpacing: 0.3,
+              marginBottom:0,
+            }}
+          >
             {propertyData.description || "No description available."}
+        </Text>
+
+
+          {/* Location */}
+          <Text style={{ fontSize: 20, color: "grey", fontWeight: "600" }}>
+            {propertyData.location}
           </Text>
 
-          <Text style={styles.price}>
-            location: {propertyData.location || "No location provided."}
+          {/* Bedrooms */}
+          {propertyData.bedrooms ? (
+            <Text
+              style={{
+                color: "#696969",
+                fontSize: 20,
+                fontWeight: "500",
+                marginTop: 0,
+              }}
+            >
+              {propertyData.bedrooms} Rooms
+            </Text>
+          ) : null}
+
+          {/* Bathrooms */}
+          {propertyData.bathrooms ? (
+            <Text
+              style={{
+                color: "grey",
+                fontSize: 20,
+                fontWeight: "600",
+                marginTop: 4,
+              }}
+            >
+              {propertyData.bathrooms} bathrooms
+            </Text>
+          ) : null}
+
+           {/* Price */}
+          <Text
+            style={{
+              fontSize: 22,
+              color: "grey",
+              marginTop: 5,
+              fontWeight: "600",
+            }}
+          >
+            ZMW{propertyData.price} /month
           </Text>
 
-           <Text style={styles.price}>k{propertyData.price}/month</Text>
+          {/* Distance */}
+          {propertyData.distance !== undefined && (
+            <Text
+              style={{
+                fontStyle: "italic",
+                fontSize: 20,
+                color: "black",
+                marginTop: 8,
+                fontWeight:"400",
+              }}
+            >
+              {propertyData.distance < 0.5
+                ? `Approximately ${(propertyData.distance * 1000).toFixed(
+                    0
+                  )} meters away from where you are`
+                : `Approximately ${propertyData.distance.toFixed(
+                    2
+                  )} km away from where you are`}
+            </Text>
+          )}
 
-            {propertyData.bathrooms? 
-                 <Text style={styles.price}>Bathrooms {propertyData.bathrooms}</Text> : 
-               ""
-             }
-
-              {propertyData.bedrooms? (
-                <Text>{propertyData.bedrooms} bedrooms</Text>
-              ):(
-                <Text> </Text>
-              )}
-
+           {/* Status / Bedspaces */}
           {propertyData.type === "house" ? (
-                                  propertyData.status ? (
-                                    <Text style={{ color: "red", fontSize: 20 }}>Rented</Text>
-                                  ) : (
-                                    <Text style={{ color: "green", fontSize: 20 }}>Available</Text>
-                                  )
-                                ) : propertyData.type === "boardinghouse" ? (
-                                  <Text style={{ fontSize: 20 }}>
-                                    Bedspaces available: {propertyData.bedspaces_available}
-                                  </Text>
-                    ) : null}
-
-
-            {propertyData.distance ? (
-                <Text style={{ fontSize: 19, color: "black" }}>
-                  Approximately {propertyData.distance.toFixed(2)} km away from where you are
-                </Text>
-              ) : null}
+            propertyData.status ? (
+              <Text
+                style={{
+                  color: "red",
+                  fontSize: 20,
+                  fontWeight: "600",
+                  marginTop: 10,
+                }}
+              >
+                Rented ❌
+              </Text>
+            ) : (
+              <Text
+                style={{
+                  color: "green",
+                  fontSize: 20,
+                  fontWeight: "600",
+                  marginTop: 10,
+                }}
+              >
+                Available ✅
+              </Text>
+            )
+          ) : propertyData.type === "boardinghouse" ? (
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                marginTop: 10,
+                color: "black",
+              }}
+            >
+              Bedspaces available: {propertyData.bedspaces_available}
+            </Text>
+          ) : null}
 
         </View>
 
@@ -168,6 +250,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     resizeMode: "cover",
     marginBottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
   noImage: {
     width: Dimensions.get("window").width - 40,

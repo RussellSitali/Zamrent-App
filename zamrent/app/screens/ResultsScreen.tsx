@@ -126,32 +126,39 @@ export default function Results() {
                  <Text style={{ fontSize: 20, color:"grey",fontWeight:"600" }}>
                   {item.location}
                 </Text>
-                <Text style={{ fontSize: 20, color: "red", marginTop: 10, fontWeight:"600"  }}>K{item.price}/month</Text>
-               {item.type === "house" ? (
+
+                   {item.bedrooms? (
+                    <Text style={{ color: "grey", fontSize: 20,fontWeight:"600",marginTop:1 }}>{item.bedrooms} Rooms</Text>
+                   ):(
+                    <Text> </Text>
+                   )}
+
+                       <Text style={{ fontSize: 20, color: "grey", marginTop: 10, fontWeight:"600"  }}>K{item.price} / <Text style={{color:"grey"}}>month</Text></Text>
+
+            {item.distance !== undefined && (
+              <Text style={{ fontStyle: "italic",
+                fontSize: 20,
+                color: "black",
+                marginTop: 8,
+                fontWeight:"400",
+                 }}>
+                {item.distance < 0.5
+                  ? `Approximately ${(item.distance * 1000).toFixed(0)} meters away from where you are`
+                  : `Approximately ${item.distance.toFixed(2)} km away from where you are`}
+              </Text>
+            )}
+
+            {item.type === "house" ? (
                           item.status ? (
-                            <Text style={{ color: "red", fontSize: 20,fontWeight:"600",marginTop: 10 }}>Rented</Text>
+                            <Text style={{ color: "red", fontSize: 20,fontWeight:"600",marginTop: 10 }}>Rented ❌</Text>
                           ) : (
-                            <Text style={{ color: "green", fontSize: 20, fontWeight:"600" ,marginTop: 10 }}>Available</Text>
+                            <Text style={{ color: "green", fontSize: 20, fontWeight:"600" ,marginTop: 10 }}>Available ✅</Text>
                           )
                         ) : item.type === "boardinghouse" ? (
                           <Text style={{ fontSize: 20,fontWeight:"600",marginTop: 10 ,color:"black" }}>
                             Bedspaces available: {item.bedspaces_available} 
                           </Text>
                    ) : null}
-
-                   {item.bedrooms? (
-                    <Text style={{ color: "grey", fontSize: 20,fontWeight:"600",marginTop:1 }}>{item.bedrooms} bedrooms</Text>
-                   ):(
-                    <Text> </Text>
-                   )}
-
-            {item.distance !== undefined && (
-              <Text style={{ fontSize: 20, color: "black" }}>
-                {item.distance < 0.5
-                  ? `Approximately ${(item.distance * 1000).toFixed(0)} meters away from where you are`
-                  : `Approximately ${item.distance.toFixed(2)} km away from where you are`}
-              </Text>
-            )}
 
               </View>
             </TouchableOpacity>

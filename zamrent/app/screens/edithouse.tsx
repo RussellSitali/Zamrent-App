@@ -64,6 +64,7 @@ export default function EditHouse() {
             longitude: data.longitude,
           });
           setOldImages(res.data.images || []);
+
         } catch (err) {
           console.error("Failed to fetch house", err);
         }
@@ -100,7 +101,7 @@ export default function EditHouse() {
     }
   };
 
-  // Pick new images (must be exactly 3)
+  // Pick new images
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -110,8 +111,8 @@ export default function EditHouse() {
 
     if (!result.canceled) {
       const picked = result.assets;
-      if (picked.length !== 3) {
-        alert("Please select exactly 3 images.");
+      if (picked.length > 7 ) {
+        alert("Upload upto 7 maximum images");
         return;
       }
       setNewImages(picked);
@@ -164,8 +165,9 @@ const uploadToCloudinary = async (image) => {
       }
 
       let imageUrls = [];
-
-      if (newImages.length === 3) {
+      
+      if (newImages.length > 0) {
+        
         try {
           imageUrls = await Promise.all(
             newImages.map(async (img) => {
@@ -176,6 +178,9 @@ const uploadToCloudinary = async (image) => {
               }
             })
           );
+
+          console.log("These are the images that we are trying to send after mods: ", imageUrls );
+
         } catch (imgError) {
           alert(imgError.message);
           setLoading(false);

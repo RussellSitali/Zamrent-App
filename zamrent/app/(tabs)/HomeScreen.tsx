@@ -47,7 +47,7 @@ export default function HomeScreen() {
 
     const handleLogoTap = () => {
       const now = Date.now();
-      if (now - lastTapTime > 2000) { // Reset if more than 2 sec since last tap
+      if (now - lastTapTime > 2000) {
         setLogoTapCount(1);
       } else {
         setLogoTapCount(prev => prev + 1);
@@ -55,8 +55,8 @@ export default function HomeScreen() {
       setLastTapTime(now);
 
       if (logoTapCount + 1 === 13) {
-        router.push("/screens/adminloginscreen"); // Navigate to admin login
-        setLogoTapCount(0); // reset
+        router.push("/screens/adminloginscreen"); 
+        setLogoTapCount(0); 
       }
     };
 
@@ -88,8 +88,6 @@ useFocusEffect(
 
         setLat(latitude);
         setLon(longitude);
-
-        console.log("These are the coords (lat,lon): ", latitude, longitude);
 
         const label =
           propertyType === "boardinghouse"
