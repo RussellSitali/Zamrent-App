@@ -2,163 +2,137 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  TextInput,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function AdminDashboard() {
   const router = useRouter();
 
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // =============================
-  // LIVE SEARCH WITH DEBOUNCE
-  // =============================
-  useEffect(() => {
-    if (!query || query.trim().length === 0) {
-      setResults([]);
-      return;
-    }
+    useEffect(() => {          
+      const fetchDashboardStats = async () => {
+        setLoading(true);
+        try {
+         const token = await AsyncStorage.getItem("adminToken"); 
+         const id = await AsyncStorage.getItem("adminId");
 
-    const timer = setTimeout(() => {
-      searchBackend(query);
-    }, 300); // debounce
+          console.log("Logging id ", id);
 
-    return () => clearTimeout(timer);
-  }, [query]);
+          const res = await fetch(`${baseURL}/admindashboard/stats`, {
+            headers: {
+              Authorization: `Bearer ${token}`, 
+            },
+          });
 
-  // =============================
-  // API CALLS (COMMENTED)
-  // =============================
+          const data = await res.json();
+          setStats(data);
 
-  /*
-  const searchBackend = async (text) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${API_URL}/admin/search?q=${text}`,
-        {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
+        } catch (err) {
+          console.log("Admin dashboard fetch error:", err);
+        } finally {
+          setLoading(false);
         }
-      );
-      const data = await res.json();
-      setResults(data);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  */
+      };
 
-  /*
-  const banUser = async (userId) => {
-    await fetch(`${API_URL}/admin/users/${userId}/ban`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  };
-  */
+      fetchDashboardStats();
+    }, []);
 
-  /*
-  const unbanUser = async (userId) => {
-    await fetch(`${API_URL}/admin/users/${userId}/unban`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  };
-  */
-
-  /*
-  const deleteUser = async (userId) => {
-    await fetch(`${API_URL}/admin/users/${userId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  };
-  */
-
-  /*
-  const deleteListing = async (listingId) => {
-    await fetch(`${API_URL}/admin/listings/${listingId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
-  };
-  */
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 10 }}>Loading dashboard...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <View style={styles.header}>
-        <Text style={styles.title}>ZamRent Admin</Text>
-        <TouchableOpacity onPress={() => router.replace("/(tabs)/HomeScreen")}>
-          <Text style={styles.logout}>Logout</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Admin Dashboard</Text>
+        <Text style={styles.subtitle}>ZamRent Control Panel</Text>
       </View>
 
-      {/* Search Input */}
-      <View style={styles.searchBox}>
-        <TextInput
-          style={styles.input}
-          placeholder="Search listings, email, phone, location..."
-          value={query}
-          onChangeText={setQuery}
+      {/* ================= STATS ================= */}
+      <View style={styles.statsGrid}>
+        <StatCard label="Total Users" value={stats?.totalUsers} />
+        <StatCard label="Total Listings" value={stats?.totalListings} />
+        <StatCard label="Verified Users" value={stats?.verifiedUsers} />
+        <StatCard
+          label="Pending Verifications"
+          value={stats?.pendingVerifications}
+          highlight
         />
       </View>
 
-      {loading && <ActivityIndicator size="small" />}
+      {/* ================= QUICK ACTIONS ================= */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-      {/* Results */}
-      {results.map((item) => (
-        <View key={item.listing_id} style={styles.card}>
-          {/* Listing Info */}
-          <Text style={styles.listingTitle}>{item.title}</Text>
-          <Text>Location: {item.location}</Text>
-          <Text>Status: {item.listing_status}</Text>
-
-          {/* User Info */}
-          <View style={styles.userInfo}>
-            <Text>User: {item.user_email}</Text>
-            <Text>Phone: {item.user_phone}</Text>
-            <Text>User Status: {item.user_status}</Text>
-          </View>
-
-          {/* Actions */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.deleteListingBtn}>
-              <Text style={styles.btnText}>Delete Listing</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.banBtn}>
-              <Text style={styles.btnText}>Ban User</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.unbanBtn}>
-              <Text style={styles.btnText}>Unban User</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.deleteUserBtn}>
-              <Text style={styles.btnText}>Delete User</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.actionsGrid}>
+          <ActionButton
+            label="Manage Listings"
+            onPress={() => router.push("/admin/listings")}
+          />
+          <ActionButton
+            label="Manage Users"
+            onPress={() => router.push("/screens/manageusers")}
+          />
+          <ActionButton
+            label="Verifications"
+            onPress={() => router.push("/admin/verifications")}
+            warning
+          />
         </View>
-      ))}
+      </View>
 
-      {!loading && query.length > 0 && results.length === 0 && (
-        <Text style={styles.emptyText}>No results found</Text>
-      )}
+      {/* ================= RECENT ACTIVITY ================= */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+
+        {/* Placeholder rows */}
+        <ActivityItem text="—" />
+        <ActivityItem text="—" />
+        <ActivityItem text="—" />
+      </View>
     </ScrollView>
   );
 }
+
+const StatCard = ({ label, value, highlight }) => (
+  <View style={[styles.statCard, highlight && styles.highlightCard]}>
+    <Text style={styles.statValue}>
+      {value !== undefined && value !== null ? value : "—"}
+    </Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
+
+const ActionButton = ({ label, onPress, warning }) => (
+  <TouchableOpacity
+    style={[styles.actionBtn, warning && styles.warningBtn]}
+    onPress={onPress}
+  >
+    <Text style={styles.actionText}>{label}</Text>
+  </TouchableOpacity>
+);
+
+const ActivityItem = ({ text }) => (
+  <View style={styles.activityItem}>
+    <Text style={styles.activityText}>{text}</Text>
+  </View>
+);
+
 
 const styles = StyleSheet.create({
   container: {
@@ -166,78 +140,79 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 16,
   },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 20,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 26,
+    fontWeight: "800",
     color: "#2f95dc",
   },
-  logout: {
-    color: "red",
-    fontWeight: "600",
+  subtitle: {
+    color: "#777",
+    marginTop: 4,
   },
-  searchBox: {
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-  },
-  card: {
-    backgroundColor: "#f5f5f5",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 14,
-  },
-  listingTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  userInfo: {
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  actionsRow: {
+  statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 8,
+    gap: 12,
   },
-  deleteListingBtn: {
-    backgroundColor: "#d9534f",
-    padding: 8,
-    borderRadius: 6,
+  statCard: {
+    width: "48%",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    padding: 16,
   },
-  banBtn: {
+  highlightCard: {
+    backgroundColor: "#fff3cd",
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  statLabel: {
+    color: "#555",
+    marginTop: 4,
+  },
+  section: {
+    marginTop: 28,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  actionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  actionBtn: {
+    backgroundColor: "#2f95dc",
+    padding: 14,
+    borderRadius: 10,
+    width: "48%",
+    alignItems: "center",
+  },
+  warningBtn: {
     backgroundColor: "#f0ad4e",
-    padding: 8,
-    borderRadius: 6,
   },
-  unbanBtn: {
-    backgroundColor: "#5cb85c",
-    padding: 8,
-    borderRadius: 6,
-  },
-  deleteUserBtn: {
-    backgroundColor: "#b52b27",
-    padding: 8,
-    borderRadius: 6,
-  },
-  btnText: {
+  actionText: {
     color: "#fff",
-    fontWeight: "600",
-    fontSize: 12,
+    fontWeight: "700",
   },
-  emptyText: {
-    textAlign: "center",
-    color: "#999",
-    marginTop: 20,
+  activityItem: {
+    backgroundColor: "#f7f7f7",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  activityText: {
+    color: "#444",
   },
 });
