@@ -11,7 +11,8 @@ import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ManageUsersScreen() {
-  
+
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
   const [results, setResults] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,6 +21,7 @@ export default function ManageUsersScreen() {
 
     const handleSearch = async () => {
     const token = await AsyncStorage.getItem("adminToken"); 
+    console.log("Token from users admin", token);
     
     if (!searchQuery.trim()) {
         alert("Please enter email or phone number");
@@ -30,24 +32,24 @@ export default function ManageUsersScreen() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-        `/admin/users/search?q=${encodeURIComponent(searchQuery)}`,
+        const response = await fetch(`${baseURL}/api/admin/user/search?q=${encodeURIComponent(searchQuery)}`,
         {
             method: "GET",
             headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // if you're using JWT
+            Authorization: `Bearer ${token}`, 
             },
         }
         );
 
         const data = await response.json();
+        console.log("Data from admin user", data);
 
         if (!response.ok) {
         throw new Error(data.message || "Search failed");
         }
 
-        setResults(data.data); // array or single user
+        setResults(data); 
     } catch (err) {
         setError(err.message);
         setResults(null);
@@ -60,9 +62,7 @@ export default function ManageUsersScreen() {
   return (
     <View style={styles.container}>
 
-      {/* ===================== */}
       {/* TOP: SEARCH SECTION */}
-      {/* ===================== */}
       <View style={styles.searchSection}>
         <Text style={styles.pageTitle}>Manage Users</Text>
 
@@ -78,9 +78,7 @@ export default function ManageUsersScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* ===================== */}
-      {/* BOTTOM: RESULTS */}
-      {/* ===================== */}
+
       <View style={styles.resultsSection}>
         {results.length === 0 ? (
           <Text style={styles.placeholderText}>
@@ -90,8 +88,12 @@ export default function ManageUsersScreen() {
           <ScrollView showsVerticalScrollIndicator={false}>
             {results.map((user) => (
               <View key={user.id} style={styles.userCard}>
-                <Text style={styles.userEmail}>{user.email}</Text>
-                <Text style={styles.userPhone}>{user.phone}</Text>
+                <Text style={styles.userEmail}>Names: {user.first_name} {user.last_name}</Text>
+                <Text style={styles.userPhone}>Email: {user.email}</Text>
+                <Text style={styles.userPhone}>Phone number: {user.phone}</Text>
+                <Text style={styles.userPhone}>Verification: {user.verification}</Text>
+                <Text style={styles.userPhone}>Account Verified: {user.account_verified}</Text>
+                <Text style={styles.userPhone}>DOB: {user.date_account_created}</Text>
 
                 <Text
                   style={[
