@@ -11,7 +11,6 @@ export default function AdminLoginScreen() {
 
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
-  
 
   const handleAccount = () => {
     router.push('/screens/adminsignup');

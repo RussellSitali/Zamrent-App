@@ -122,8 +122,7 @@ export default function AddListing() {
         continue;
       }
 
-      console.log("This is the img",img);
-      console.log("This is the img uri: ", img.uri);
+      
 
    // Fetch the image as a blob (works for both mobile and web)
       const response = await fetch(img.uri);

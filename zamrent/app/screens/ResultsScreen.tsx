@@ -16,8 +16,6 @@ export default function Results() {
   const finalData = JSON.parse(results);
   const router = useRouter();
 
-  console.log("This is the final data: ", finalData);
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header with Back Button */}

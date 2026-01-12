@@ -24,6 +24,10 @@ export default function PropertyDetailsScreen() {
     }
   };
 
+  console.log("Trying to see the phone number", propertyData.phone_number);
+
+ 
+
   const handleWhatsApp = () => {
     if (propertyData.ownerPhone) {
       Linking.openURL(`https://wa.me/${propertyData.phone_number.replace(/\D/g, "")}`);
@@ -133,7 +137,7 @@ export default function PropertyDetailsScreen() {
               fontWeight: "600",
             }}
           >
-            ZMW{propertyData.price} /month
+            ZMW {propertyData.price} /month
           </Text>
 
           {/* Distance */}
@@ -208,6 +212,26 @@ export default function PropertyDetailsScreen() {
               <Text style={styles.contactText}>💬 WhatsApp</Text>
             </TouchableOpacity>
           </View>
+           <TouchableOpacity
+              style={styles.reportButton}
+              onPress={() =>
+                router.push({
+                  pathname: "/screens/reportpage",
+                  params: {
+                    listing_id: propertyData.id,
+                    owner_phone: propertyData.phone_number,
+                    title: propertyData.title,
+                  },
+                })
+              }
+            >
+              <Text style={styles.reportIcon}>⚠️</Text>
+              <Text style={styles.reportText}>Report this listing</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.reportSubText}>
+              Something wrong or suspicious about this property?
+            </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -232,6 +256,42 @@ const styles = StyleSheet.create({
   backText: { fontSize: 18, color: "#2f95dc" },
   headerTitle: { fontSize: 20, fontWeight: "bold", marginLeft: 20 },
 
+  reportCard: {
+  backgroundColor: "#fff",
+  borderRadius: 10,
+  padding: 12,
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: "#f5c6cb",
+},
+
+reportButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 12,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: "#dc3545",
+},
+
+reportIcon: {
+  fontSize: 18,
+  marginRight: 8,
+},
+
+reportText: {
+  fontSize: 16,
+  fontWeight: "600",
+  color: "#dc3545",
+},
+
+reportSubText: {
+  marginTop: 8,
+  fontSize: 14,
+  color: "#6c757d",
+  textAlign: "center",
+}, 
   card: {
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -278,6 +338,7 @@ const styles = StyleSheet.create({
   },
   contactText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
+
 
 
 

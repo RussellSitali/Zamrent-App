@@ -1,4 +1,3 @@
-
 import {
   View,
   Text,
@@ -6,62 +5,137 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ManageUsersScreen() {
-
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
-  const [results, setResults] = useState([]); 
+
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
 
-    const handleSearch = async () => {
-    const token = await AsyncStorage.getItem("adminToken"); 
-    console.log("Token from users admin", token);
-    
+  const handleSearch = async () => {
+    const token = await AsyncStorage.getItem("adminToken");
+
     if (!searchQuery.trim()) {
-        alert("Please enter email or phone number");
-        return;
+      Alert.alert("Error", "Please enter email or phone number");
+      return;
     }
 
     try {
-        setLoading(true);
-        setError(null);
+      setLoading(true);
+      setError(null);
 
-        const response = await fetch(`${baseURL}/api/admin/user/search?q=${encodeURIComponent(searchQuery)}`,
+      const response = await fetch(
+        `${baseURL}/api/admin/user/search?q=${encodeURIComponent(searchQuery)}`,
         {
-            method: "GET",
-            headers: {
+          method: "GET",
+          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, 
-            },
+            Authorization: `Bearer ${token}`,
+          },
         }
-        );
+      );
 
-        const data = await response.json();
-        console.log("Data from admin user", data);
+      const data = await response.json();
 
-        if (!response.ok) {
+      if (!response.ok) {
         throw new Error(data.message || "Search failed");
-        }
+      }
 
-        setResults(data); 
+      setResults(data);
     } catch (err) {
-        setError(err.message);
-        setResults(null);
+      setError(err.message);
+      setResults([]);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
+  };
 
+
+  const handleBanUser = async (userId) => {
+    console.log("Ban was clicked ", userId);
+    
+            try {
+              const token = await AsyncStorage.getItem("adminToken");
+
+              const response = await fetch(
+                `${baseURL}/api/admin/user/${userId}/ban`,
+                {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.message || "Failed to ban user");
+              }
+
+              // Update UI instantly
+              setResults((prev) =>
+                prev.map((user) =>
+                  user.id === userId
+                    ? { ...user, status: "banned" }
+                    : user
+                )
+              );
+
+              Alert.alert("Success", "User has been banned successfully");
+            } catch (err) {
+              Alert.alert("Error", err.message);
+            }
+          }
+
+  const handleUnbanUser = async (userId) => {
+    console.log("Unban was clicked ", userId);
+
+            try {
+              const token = await AsyncStorage.getItem("adminToken");
+
+              const response = await fetch(
+                `${baseURL}/api/admin/user/${userId}/unban`,
+                {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.message || "Failed to unban user");
+              }
+
+              // Update UI instantly
+              setResults((prev) =>
+                prev.map((user) =>
+                  user.id === userId
+                    ? { ...user, status: "active" }
+                    : user
+                )
+              );
+
+              Alert.alert("Success", "User has been unbanned successfully");
+            } catch (err) {
+              Alert.alert("Error", err.message);
+            }
+          }
 
   return (
     <View style={styles.container}>
-
       {/* TOP: SEARCH SECTION */}
       <View style={styles.searchSection}>
         <Text style={styles.pageTitle}>Manage Users</Text>
@@ -78,22 +152,32 @@ export default function ManageUsersScreen() {
         </TouchableOpacity>
       </View>
 
-
+      {/* RESULTS */}
       <View style={styles.resultsSection}>
         {results.length === 0 ? (
           <Text style={styles.placeholderText}>
             Search results will appear here
           </Text>
         ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            >
             {results.map((user) => (
               <View key={user.id} style={styles.userCard}>
-                <Text style={styles.userEmail}>Names: {user.first_name} {user.last_name}</Text>
+                <Text style={styles.userEmail}>
+                  Names: {user.first_name} {user.last_name}
+                </Text>
                 <Text style={styles.userPhone}>Email: {user.email}</Text>
                 <Text style={styles.userPhone}>Phone number: {user.phone}</Text>
-                <Text style={styles.userPhone}>Verification: {user.verification}</Text>
-                <Text style={styles.userPhone}>Account Verified: {user.account_verified}</Text>
-                <Text style={styles.userPhone}>DOB: {user.date_account_created}</Text>
+                <Text style={styles.userPhone}>
+                  Verification: {user.verification}
+                </Text>
+                <Text style={styles.userPhone}>
+                  Account Verified: {String(user.account_verified)}
+                </Text>
+                <Text style={styles.userPhone}>
+                  DOB: {user.date_account_created}
+                </Text>
 
                 <Text
                   style={[
@@ -107,13 +191,21 @@ export default function ManageUsersScreen() {
                 </Text>
 
                 <View style={styles.actionsRow}>
-                  <TouchableOpacity style={styles.banBtn}>
-                    <Text style={styles.btnText}>Ban</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.unbanBtn}>
-                    <Text style={styles.btnText}>Unban</Text>
-                  </TouchableOpacity>
+                  {user.status !== "banned" ? (
+                    <TouchableOpacity
+                      style={styles.banBtn}
+                      onPress={() => handleBanUser(user.id)}
+                    >
+                      <Text style={styles.btnText}>Ban</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.unbanBtn}
+                      onPress={() => handleUnbanUser(user.id)}
+                    >
+                      <Text style={styles.btnText}>Unban</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))}
@@ -124,13 +216,13 @@ export default function ManageUsersScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
 
-  /* SEARCH SECTION */
   searchSection: {
     padding: 16,
     borderBottomWidth: 1,
@@ -164,7 +256,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* RESULTS SECTION */
   resultsSection: {
     flex: 1,
     padding: 16,
