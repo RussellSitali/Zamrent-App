@@ -23,8 +23,8 @@ export default function AdminDashboard() {
         setLoading(true);
         try {
          const token = await AsyncStorage.getItem("adminToken"); 
-         
-          const res = await fetch(`${baseURL}/admindashboard/stats`, {
+
+         const res = await fetch(`${baseURL}/admindashboard/stats`, {
             headers: {
               Authorization: `Bearer ${token}`, 
             },
@@ -89,6 +89,10 @@ export default function AdminDashboard() {
             label="Verifications"
             onPress={() => router.push("/admin/verifications")}
             warning
+          />
+          <ActionButton
+            label="Reports"
+            onPress={() => router.push("/screens/adminreportview")}
           />
         </View>
       </View>

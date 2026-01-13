@@ -24,7 +24,7 @@ const router = useRouter();
 
     useEffect(() => {
     const init = async () => {
-        const token = await AsyncStorage.getItem("admin_token");
+        const token = await AsyncStorage.getItem("adminToken");
 
         if (!token) {
         router.replace("/(tabs)/HomeScreen");
@@ -40,7 +40,26 @@ const router = useRouter();
 
   const fetchReports = async () => {
     try {
-      const res = await fetch(`${baseURL}/api/admin/reports`);
+     
+      const token = await AsyncStorage.getItem("adminToken");
+
+      if (!token) {
+        router.replace("/(tabs)/HomeScreen");
+        return;
+      }
+
+      const res = await fetch(`${baseURL}/api/admin/reports`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch reports");
+      }
+
       const data = await res.json();
       setReports(data);
     } catch (err) {
@@ -50,23 +69,35 @@ const router = useRouter();
     }
   };
 
-  const markAsViewed = async (reportId) => {
-    try {
-      await fetch(
-        `${baseURL}/api/admin/reports/${reportId}/viewed`,
-        { method: "PATCH" }
-      );
 
-      // Update local state
-      setReports((prev) =>
-        prev.map((r) =>
-          r.id === reportId ? { ...r, status: "viewed" } : r
-        )
-      );
-    } catch (err) {
-      console.log("Failed to mark report as viewed", err);
-    }
-  };
+    const markAsViewed = async (reportId) => {
+      try {
+        const token = await AsyncStorage.getItem("adminToken");
+
+        if (!token) {
+          console.log("No admin token found");
+          return;
+        }
+
+        await fetch(`${baseURL}/api/admin/reports/${reportId}/viewed`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, 
+          },
+        });
+
+        // Update local state
+        setReports((prev) =>
+          prev.map((r) =>
+            r.id === reportId ? { ...r, status: "viewed" } : r
+          )
+        );
+      } catch (err) {
+        console.log("Failed to mark report as viewed", err);
+      }
+    };
+
 
   const filteredReports = reports.filter(
     (r) => r.status === filter
@@ -128,7 +159,7 @@ const router = useRouter();
                 </Text>
 
                 <Text style={styles.bold}>
-                  Owner phone:{" "}
+                  Landy's phone#:{" "}
                   <Text style={styles.normal}>{report.owner_phone}</Text>
                 </Text>
 
@@ -148,7 +179,7 @@ const router = useRouter();
 
                 <Text style={styles.message}>{report.message}</Text>
 
-                <Text style={styles.date}>
+                <Text style={styles.date}> DateReportSent: 
                   {new Date(report.created_at).toLocaleString()}
                 </Text>
 
@@ -243,3 +274,6 @@ const styles = StyleSheet.create({
     color: "#777",
   },
 });
+
+
+// Work on to show which stuff have already been viewed
