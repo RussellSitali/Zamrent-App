@@ -23,10 +23,7 @@ export default function AdminDashboard() {
         setLoading(true);
         try {
          const token = await AsyncStorage.getItem("adminToken"); 
-         const id = await AsyncStorage.getItem("adminId");
-
-          console.log("Logging id ", id);
-
+         
           const res = await fetch(`${baseURL}/admindashboard/stats`, {
             headers: {
               Authorization: `Bearer ${token}`, 
