@@ -79,7 +79,7 @@ export default function AdminDashboard() {
         <View style={styles.actionsGrid}>
           <ActionButton
             label="Manage Listings"
-            onPress={() => router.push("/admin/listings")}
+            onPress={() => router.push("/screens/adminmanagelisting")}
           />
           <ActionButton
             label="Manage Users"
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
           />
           <ActionButton
             label="Verifications"
-            onPress={() => router.push("/admin/verifications")}
+            onPress={() => router.push("/screens/adminverificationpage")}
             warning
           />
           <ActionButton
