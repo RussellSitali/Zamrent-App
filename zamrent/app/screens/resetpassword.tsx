@@ -12,7 +12,7 @@ export default function ForgotPasswordScreen() {
 
   const handleResetRequest = async () => {
     if (!email) {
-      Alert.alert("Error", "Please enter your email address.");
+      setInfo("Please enter your email address.");
       return;
     }
 
@@ -24,22 +24,28 @@ export default function ForgotPasswordScreen() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      setEmail("")
 
       const data = await response.json();
-      setInfo(data.message);
+
+      setInfo(data.message); // show backend message in UI
+      setEmail(""); // clear input
 
       if (response.ok) {
-        Alert.alert("Success", "If this email is registered, you’ll receive reset instructions.");
-      } else {
-        Alert.alert("Error", data.message || "Something went wrong.");
+        // Navigate to the screen where the user enters the code
+        router.push({
+          pathname: "/screens/enterresetcode",
+          params: { email }, 
+        });
       }
+
     } catch (error) {
-      Alert.alert("Error", "Unable to send request. Please try again later.");
+      console.error("Forgot password request error:", error);
+      setInfo("Unable to send request. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -53,6 +59,7 @@ export default function ForgotPasswordScreen() {
 
       <TextInput
         style={styles.input}
+        placeholderTextColor="#000"
         placeholder="Email Address"
         keyboardType="email-address"
         autoCapitalize="none"

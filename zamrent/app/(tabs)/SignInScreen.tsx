@@ -87,6 +87,7 @@ export default function Login() {
             <View style={styles.formContainer}>
               <TextInput
                 style={styles.input}
+                placeholderTextColor="#000"
                 placeholder="Email"
                 keyboardType="email-address"
                 value={formData.email}
@@ -96,6 +97,7 @@ export default function Login() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={[styles.input, { flex: 1 }]}
+                  placeholderTextColor="#000"
                   placeholder="Password"
                   secureTextEntry={show}
                   value={formData.password}
