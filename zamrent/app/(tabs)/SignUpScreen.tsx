@@ -10,6 +10,8 @@ import {
   Platform,
 } from "react-native";
 
+import { router } from 'expo-router';
+
 export default function Signup() {
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -48,6 +50,12 @@ export default function Signup() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+      // backend returned an error
+      setMessage(data.message || "Signup failed. Please try again.");
+      return; 
+    }
+
       setFormData({
         firstname: "",
         lastname: "",
@@ -58,6 +66,15 @@ export default function Signup() {
       });
 
       setMessage(data.message);
+
+      // after successful signup
+      router.push({
+        pathname: '/screens/verifyemailaccount',
+        params: {
+          email: formData.email,
+        },
+      });
+
     } catch (error) {
       console.error(error);
     }
@@ -79,6 +96,7 @@ export default function Signup() {
         <View style={styles.form}>
           <TextInput
             style={styles.input}
+            placeholderTextColor="#000"
             placeholder="First Name"
             value={formData.firstname}
             onChangeText={(value) => handleChange("firstname", value)}
@@ -86,6 +104,7 @@ export default function Signup() {
 
           <TextInput
             style={styles.input}
+            placeholderTextColor="#000"
             placeholder="Last Name"
             value={formData.lastname}
             onChangeText={(value) => handleChange("lastname", value)}
@@ -94,6 +113,7 @@ export default function Signup() {
           <TextInput
             style={styles.input}
             keyboardType="numeric"
+            placeholderTextColor="#000"
             placeholder="Phone Number"
             value={formData.phonenumber}
             onChangeText={(value) => handleChange("phonenumber", value)}
@@ -101,6 +121,7 @@ export default function Signup() {
 
           <TextInput
             style={styles.input}
+            placeholderTextColor="#000"
             placeholder="Email Address"
             keyboardType="email-address"
             value={formData.email}
@@ -111,6 +132,7 @@ export default function Signup() {
             <TextInput
               style={[styles.input, { flex: 1 }]}
               secureTextEntry={show1}
+              placeholderTextColor="#000"
               placeholder="Password"
               value={formData.password}
               onChangeText={(value) => handleChange("password", value)}
@@ -124,6 +146,7 @@ export default function Signup() {
             <TextInput
               style={[styles.input, { flex: 1 }]}
               secureTextEntry={show2}
+              placeholderTextColor="#000"
               placeholder="Confirm Password"
               value={formData.confirmpassword}
               onChangeText={(value) => handleChange("confirmpassword", value)}
