@@ -57,7 +57,7 @@ export default function Login() {
         if (data.token && data.user) {
           await AsyncStorage.setItem("userToken", data.token);
           await AsyncStorage.setItem("userInfo", JSON.stringify(data.user));
-          router.replace("/(tabs)/Profile");
+          router.replace("/(tabs)/profile");
         }
       } else {
         await AsyncStorage.removeItem("userToken");

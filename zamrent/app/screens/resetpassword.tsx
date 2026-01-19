@@ -27,11 +27,11 @@ export default function ForgotPasswordScreen() {
 
       const data = await response.json();
 
-      setInfo(data.message); // show backend message in UI
-      setEmail(""); // clear input
+      setInfo(data.message);
+      setEmail(""); 
 
       if (response.ok) {
-        // Navigate to the screen where the user enters the code
+        // Navigate to the screen where the user enters the new passwword
         router.push({
           pathname: "/screens/enterresetcode",
           params: { email }, 

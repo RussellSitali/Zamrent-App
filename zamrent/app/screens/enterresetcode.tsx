@@ -34,7 +34,7 @@ const EnterResetCodeScreen = () => {
       if (response.ok) {
         // Navigate to the new password screen, passing email and code
         router.push({
-          pathname: "/screens/resetpassword",
+          pathname: "/screens/passwordscreen",
           params: { email, code },
         });
       }
