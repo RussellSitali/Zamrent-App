@@ -16,11 +16,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
+import { Platform } from "react-native";
+
 
 export default function EditHouse() {
   const router = useRouter();
   const { propertyId } = useLocalSearchParams();
-  const baseURL = process.env.EXPO_PUBLIC_API_URL
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
   const [form, setForm] = useState({
     title: "",
@@ -119,16 +121,29 @@ export default function EditHouse() {
     }
   };
 
-  // Upload to Cloudinary (blob-safe)
-const uploadToCloudinary = async (image) => {
-  if (!image.uri) throw new Error("Image URI is missing");
 
-        // Fetch the image as a blob (works on mobile + web)
-        const response = await fetch(image.uri);
-        const blob = await response.blob();
+      // Upload to Cloudinary (platform-safe)
+      const uploadToCloudinary = async (image) => {
+        if (!image?.uri) {
+          throw new Error("Image URI is missing");
+        }
 
         const formData = new FormData();
-        formData.append("file", blob);
+
+        if (Platform.OS === "web") {
+          // 🌐 WEB: blob upload
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          formData.append("file", blob);
+        } else {
+          // 📱 MOBILE: file object upload (Android / iOS)
+          formData.append("file", {
+            uri: image.uri,
+            name: image.fileName || `photo_${Date.now()}.jpg`,
+            type: image.mimeType || "image/jpeg",
+          });
+        }
+
         formData.append("upload_preset", "zamrent");
 
         const cloudRes = await fetch(
@@ -146,10 +161,11 @@ const uploadToCloudinary = async (image) => {
         }
 
         return {
-          image_url: data.secure_url, 
+          image_url: data.secure_url,
           public_id: data.public_id,
         };
       };
+
 
 
   // Submit updated house
@@ -233,31 +249,36 @@ const uploadToCloudinary = async (image) => {
         <TextInput
           style={styles.input}
           placeholder="Title"
+          placeholderTextColor="#000"
           value={form.title}
           onChangeText={(text) => handleChange("title", text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Location"
+          placeholderTextColor="#000"
           value={form.location}
           onChangeText={(text) => handleChange("location", text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Description"
+          placeholderTextColor="#000"
           value={form.description}
           onChangeText={(text) => handleChange("description", text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Price"
+          placeholderTextColor="#000"
           keyboardType="numeric"
           value={form.price}
           onChangeText={(text) => handleChange("price", text)}
         />
         <TextInput
           style={styles.input}
-          placeholder="Bedrooms"
+          placeholder="Rooms"
+          placeholderTextColor="#000"
           keyboardType="numeric"
           value={form.bedrooms}
           onChangeText={(text) => handleChange("bedrooms", text)}

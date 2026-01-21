@@ -13,7 +13,7 @@ export default function VerificationLandingPage() {
 
   const handleTrustedVerification = () => {
     // router.push("/screens/verification/trusted"); navigate to Trusted Verification
-    console.log('trusted was pressed!');
+    router.push("/screens/trustedverification");
   };
 
   return (

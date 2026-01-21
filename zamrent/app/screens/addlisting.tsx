@@ -15,6 +15,7 @@ import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomDrawer from "../../components/drawer";
+import { Platform } from "react-native";
 
 export default function AddListing() {
   const router = useRouter();
@@ -81,8 +82,6 @@ export default function AddListing() {
     if (!result.canceled) {
       setImages((prev) => [...prev, ...result.assets]);
     }
-
-    console.log("These are the assests", result.assets)
   };
 
   const removeImage = (index) => {
@@ -106,54 +105,52 @@ export default function AddListing() {
         return;
       }
 
-      if (images.length !== 3) {
-        setError("Please upload exactly 3 image");
-        setLoading(false);
-        return;
-      }
-
      // Upload images to Cloudinary
-      const uploadedImages = [];
+  
+          const uploadedImages = [];
 
-    for (const img of images) {
-      // Make sure img.uri exists
-      if (!img.uri) {
-        console.warn("Skipping image, no uri:", img);
-        continue;
-      }
+          for (const img of images) {
+            if (!img.uri) continue;
 
-      
+            const formData = new FormData();
 
-   // Fetch the image as a blob (works for both mobile and web)
-      const response = await fetch(img.uri);
-      const blob = await response.blob();
+            if (Platform.OS === "web") {
+              // 🌐 WEB: use blob
+              const response = await fetch(img.uri);
+              const blob = await response.blob();
+              formData.append("file", blob);
+            } else {
+              // 📱 MOBILE: use file object
+              formData.append("file", {
+                uri: img.uri,
+                name: img.fileName || `photo_${Date.now()}.jpg`,
+                type: img.mimeType || "image/jpeg",
+              });
+            }
 
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", "zamrent");
+            formData.append("upload_preset", "zamrent");
 
-      const cloudResponse = await fetch(
-        "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+            const cloudResponse = await fetch(
+              "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
 
-      const data = await cloudResponse.json();
-      console.log("Cloudinary response:", data);
+            const data = await cloudResponse.json();
 
-      if (!cloudResponse.ok) {
-        throw new Error(data.error?.message || "Cloudinary upload failed");
-      }
+            if (!cloudResponse.ok) {
+              throw new Error(data.error?.message || "Cloudinary upload failed");
+            }
 
-      uploadedImages.push({
-        image_url: data.secure_url,
-        public_id: data.public_id,
-      });
-    }
+            uploadedImages.push({
+              image_url: data.secure_url,
+              public_id: data.public_id,
+            });
+          }
 
-    console.log("All uploaded images:", uploadedImages);
+
 
       // Create listing payload
       let endpoint = "";
@@ -256,18 +253,21 @@ export default function AddListing() {
           <TextInput
             style={styles.input}
             placeholder="Title"
+            placeholderTextColor="#000"
             value={title}
             onChangeText={setTitle}
           />
           <TextInput
             style={styles.input}
             placeholder="Description"
+            placeholderTextColor="#000"
             value={description}
             onChangeText={setDescription}
           />
           <TextInput
             style={styles.input}
             placeholder="Price"
+            placeholderTextColor="#000"
             keyboardType="numeric"
             value={price}
             onChangeText={setPrice}
@@ -275,19 +275,21 @@ export default function AddListing() {
           <TextInput
             style={styles.input}
             placeholder="Location"
+            placeholderTextColor="#000"
             value={location}
             onChangeText={setLocation}
           />
-
+          <Text>If your property is here, go ahead and press the button to mark it on the map!</Text>
           <TouchableOpacity style={styles.buttonSecondary} onPress={handleGetLocation}>
-            <Text style={styles.buttonText}>Use My Current Location</Text>
+            <Text style={styles.buttonText}>Here</Text>
           </TouchableOpacity>
 
           {/* Specific inputs */}
           {listingType === "house" ? (
             <TextInput
               style={styles.input}
-              placeholder="Number of bedrooms"
+              placeholder="Number of rooms"
+              placeholderTextColor="#000"
               keyboardType="numeric"
               value={numberOfRooms}
               onChangeText={setNumberOfRooms}
@@ -297,6 +299,7 @@ export default function AddListing() {
               <TextInput
                 style={styles.input}
                 placeholder="Bed Spaces"
+                placeholderTextColor="#000"
                 keyboardType="numeric"
                 value={bedSpaces}
                 onChangeText={setBedSpaces}
@@ -304,6 +307,7 @@ export default function AddListing() {
               <TextInput
                 style={styles.input}
                 placeholder="Bathrooms"
+                placeholderTextColor="#000"
                 keyboardType="numeric"
                 value={bathrooms}
                 onChangeText={setBathrooms}

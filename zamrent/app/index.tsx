@@ -17,7 +17,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to ZamRent</Text>
+      <Text style={styles.title}>ZamRent24</Text>
     </View>
   );
 }

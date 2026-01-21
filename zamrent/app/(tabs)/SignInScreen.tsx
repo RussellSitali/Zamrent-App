@@ -51,13 +51,12 @@ export default function Login() {
       });
 
       const data = await res.json();
-      console.log("Server response:", data);
 
       if (res.ok) {
         if (data.token && data.user) {
           await AsyncStorage.setItem("userToken", data.token);
           await AsyncStorage.setItem("userInfo", JSON.stringify(data.user));
-          router.replace("/(tabs)/profile");
+          router.replace("/(tabs)/Profile");
         }
       } else {
         await AsyncStorage.removeItem("userToken");
@@ -82,7 +81,7 @@ export default function Login() {
           style={{ flex: 1 }}
         >
           <View style={styles.main}>
-            <Text style={styles.header}>ZamRent</Text>
+            <Text style={styles.header}>ZamRent24</Text>
 
             <View style={styles.formContainer}>
               <TextInput

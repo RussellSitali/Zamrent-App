@@ -96,11 +96,11 @@ useFocusEffect(
 
         setLocation(label);
 
-        if (accuracy > 100) {
-          alert(
-            "Note: Your location accuracy is low. Consider enabling high accuracy mode."
-          );
-        }
+        // if (accuracy > 100) {
+        //   alert(
+        //     "Note: Your location accuracy is low. Consider enabling high accuracy mode."
+        //   );
+        // }
       })();
     }
   }, [filter, propertyType]);
@@ -174,7 +174,7 @@ useFocusEffect(
           {/* Top Section */}
           <View style={styles.topsection}>
             <TouchableOpacity onPress={handleLogoTap}>
-              <Text style={styles.header}>ZamRent 🏠</Text>
+              <Text style={styles.header}>ZamRent24</Text>
             </TouchableOpacity>
 
             <Text style={styles.subheader}>
@@ -188,7 +188,7 @@ useFocusEffect(
               style={styles.inputField}
               value={location}
               onChangeText={setLocation}
-              placeholder="Search location..."
+              placeholder="Search by location or property name..."
               placeholderTextColor="gray"
             />
 

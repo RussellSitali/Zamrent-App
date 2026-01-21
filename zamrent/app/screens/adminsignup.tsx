@@ -61,9 +61,9 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Username"
+        placeholderTextColor="#000"
         value={username}
         onChangeText={setUsername}
-        placeholderTextColor="#888"
       />
 
       <TextInput
@@ -72,7 +72,7 @@ export default function AdminSignupScreen() {
         secureTextEntry
         value={email}
         onChangeText={setEmail}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -81,7 +81,7 @@ export default function AdminSignupScreen() {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -90,7 +90,7 @@ export default function AdminSignupScreen() {
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -99,7 +99,7 @@ export default function AdminSignupScreen() {
         secureTextEntry
         value={adminCode}
         onChangeText={setAdminCode}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -108,7 +108,7 @@ export default function AdminSignupScreen() {
         secureTextEntry
         value={adminPass}
         onChangeText={setAdminPass}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleAdminSignup}>

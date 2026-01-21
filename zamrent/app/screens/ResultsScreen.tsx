@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   View,
@@ -13,8 +14,17 @@ import Swiper from "react-native-swiper";
 
 export default function Results() {
   const { results } = useLocalSearchParams();
-  const finalData = JSON.parse(results);
+  const parsed = JSON.parse(results);
+
+  console.log("This is the parsed data ", parsed);
+
+  const finalData = parsed || [];
+
   const router = useRouter();
+
+  console.log("Parsed results:", finalData);
+  console.log("Is array?", Array.isArray(finalData));
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>

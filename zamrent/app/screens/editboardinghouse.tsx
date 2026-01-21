@@ -16,10 +16,12 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native"; 
+import { Platform } from "react-native";
 
 export default function EditBoardingHouse() {
   const router = useRouter();
   const { propertyId } = useLocalSearchParams();
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
   const [form, setForm] = useState({
     title: "",
@@ -49,7 +51,7 @@ export default function EditBoardingHouse() {
             }
 
             const res = await axios.get(
-              `http://localhost:5000/api/changeboardinghouse/${propertyId}`,
+              `${baseURL}/api/changeboardinghouse/${propertyId}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -144,47 +146,59 @@ export default function EditBoardingHouse() {
       };
 
       // If new images were selected, upload them first
-if (newImages.length > 0) {
-  const uploadedImages = [];
 
-  for (const img of newImages) {
-    if (!img.uri) {
-      console.warn("Skipping image, no uri:", img);
-      continue;
-    }
+        const uploadedImages = [];
 
-      // Fetch image as blob (web + mobile compatible)
-      const response = await fetch(img.uri);
-      const blob = await response.blob();
+        for (const img of images) {
+          // ✅ Already uploaded image (Cloudinary)
+          if (img.image_url) {
+            uploadedImages.push({
+              image_url: img.image_url,
+              public_id: img.public_id,
+            });
+            continue;
+          }
 
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", "zamrent");
+          // ❌ No local uri → skip
+          if (!img.uri) continue;
 
-      const cloudResponse = await fetch(
-        "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
-        {
-          method: "POST",
-          body: formData,
+          const formData = new FormData();
+
+          if (Platform.OS === "web") {
+            // 🌐 WEB: blob upload
+            const response = await fetch(img.uri);
+            const blob = await response.blob();
+            formData.append("file", blob);
+          } else {
+            // 📱 MOBILE: file object upload
+            formData.append("file", {
+              uri: img.uri,
+              name: img.fileName || `photo_${Date.now()}.jpg`,
+              type: img.mimeType || "image/jpeg",
+            });
+          }
+
+          formData.append("upload_preset", "zamrent");
+
+          const cloudResponse = await fetch(
+            "https://api.cloudinary.com/v1_1/dcq19o3if/image/upload",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          const data = await cloudResponse.json();
+
+          if (!cloudResponse.ok) {
+            throw new Error(data.error?.message || "Cloudinary upload failed");
+          }
+
+          uploadedImages.push({
+            image_url: data.secure_url,
+            public_id: data.public_id,
+          });
         }
-      );
-
-      const data = await cloudResponse.json();
-
-      if (!cloudResponse.ok || !data.secure_url) {
-        throw new Error(data.error?.message || "Cloudinary upload failed");
-      }
-
-      uploadedImages.push({
-        image_url: data.secure_url,   
-        public_id: data.public_id,
-      });
-    }
-
-    // attach to payload sent to backend
-    payload.images = uploadedImages;
-    console.log(payload.images, "These are the payload images");
-  }
 
 
       // Update listing in backend
@@ -212,18 +226,21 @@ if (newImages.length > 0) {
         <TextInput
           style={styles.input}
           placeholder="Title"
+          placeholderTextColor="#000"
           value={form.title}
           onChangeText={(text) => handleChange("title", text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Description"
+          placeholderTextColor="#000"
           value={form.description}
           onChangeText={(text) => handleChange("description", text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Price"
+          placeholderTextColor="#000"
           keyboardType="numeric"
           value={form.price}
           onChangeText={(text) => handleChange("price", text)}
@@ -231,6 +248,7 @@ if (newImages.length > 0) {
         <TextInput
           style={styles.input}
           placeholder="Location"
+          placeholderTextColor="#000"
           value={form.location}
           onChangeText={(text) => handleChange("location", text)}
         />
@@ -242,6 +260,7 @@ if (newImages.length > 0) {
         <TextInput
           style={styles.input}
           placeholder="Bed Spaces"
+          placeholderTextColor="#000"
           keyboardType="numeric"
           value={form.bedspaces}
           onChangeText={(text) => handleChange("bedspaces", text)}
@@ -249,6 +268,7 @@ if (newImages.length > 0) {
         <TextInput
           style={styles.input}
           placeholder="Bathrooms"
+          placeholderTextColor="#000"
           keyboardType="numeric"
           value={form.bathrooms}
           onChangeText={(text) => handleChange("bathrooms", text)}

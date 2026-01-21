@@ -21,6 +21,7 @@ export default function FilterModal({
 
           <TextInput
             placeholder="Max Price"
+            placeholderTextColor="#000"
             keyboardType="numeric"
             value={price.toString()}
             onChangeText={setPrice}
@@ -29,7 +30,8 @@ export default function FilterModal({
 
           {propertyType === "house" && (
             <TextInput
-              placeholder="Bedrooms"
+              placeholder="Rooms"
+              placeholderTextColor="#000"
               keyboardType="numeric"
               value={bedrooms.toString()}
               onChangeText={setBedrooms}
@@ -40,6 +42,7 @@ export default function FilterModal({
           {propertyType === "boardinghouse" && (
             <TextInput
               placeholder="Bedspaces"
+              placeholderTextColor="#000"
               keyboardType="numeric"
               value={bedspaces.toString()}
               onChangeText={setBedspaces}

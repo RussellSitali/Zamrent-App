@@ -8,6 +8,12 @@
     "scheme": "zamrent",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/7f312cf1-3a74-4ab5-9c61-f894852eeec1"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -43,7 +49,9 @@
     "extra": {
       "router": {
         "linking": {
-          "prefixes": ["zamrent://"],
+          "prefixes": [
+            "zamrent://"
+          ],
           "config": {
             "screens": {
               "passwordscreen": "passwordscreen",
@@ -55,6 +63,9 @@
       "eas": {
         "projectId": "7f312cf1-3a74-4ab5-9c61-f894852eeec1"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

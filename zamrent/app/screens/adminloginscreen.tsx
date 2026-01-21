@@ -66,7 +66,7 @@ export default function AdminLoginScreen() {
         placeholder="User name"
         value={username}
         onChangeText={setUsername}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -75,7 +75,7 @@ export default function AdminLoginScreen() {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TextInput
@@ -84,7 +84,7 @@ export default function AdminLoginScreen() {
         secureTextEntry
         value={secretpass}
         onChangeText={setSecretpass}
-        placeholderTextColor="#888"
+        placeholderTextColor="#000"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleAdminLogin}>
@@ -132,6 +132,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 18,
+    fontWeight: "600",
+  },
+   buttonaccount: {
+    color: "black",
+    fontSize: 21,
     fontWeight: "600",
   },
 });

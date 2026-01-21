@@ -89,6 +89,7 @@ export default function ReportScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter your name"
+            placeholderTextColor="#000"
             value={name}
             onChangeText={setName}
           />
@@ -97,6 +98,7 @@ export default function ReportScreen() {
           <TextInput
             style={styles.input}
             placeholder="e.g. 097XXXXXXX"
+            placeholderTextColor="#000"
             keyboardType="phone-pad"
             value={phone}
             onChangeText={setPhone}
@@ -106,6 +108,7 @@ export default function ReportScreen() {
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
+            placeholderTextColor="#000"
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
@@ -115,6 +118,7 @@ export default function ReportScreen() {
           <TextInput
             style={styles.input}
             placeholder="Scam / Fake / Wrong info"
+            placeholderTextColor="#000"
             value={reason}
             onChangeText={setReason}
           />
@@ -123,6 +127,7 @@ export default function ReportScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Explain what is wrong with this listing..."
+            placeholderTextColor="#000"
             multiline
             numberOfLines={4}
             value={message}

@@ -125,7 +125,6 @@ export default function Profile() {
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const rentStatus = item.status ? "Rented" : "Available";
 
-    console.log("These are the images",item.images)
 
     return (
       <View style={styles.listItem}>
@@ -247,14 +246,14 @@ export default function Profile() {
         <Text style={styles.header}> Welcome {user?.name} </Text>
         <Text style={styles.subHeader}> Manage your properties here </Text>
 
-        <Text style={styles.sectionTitle}> Houses 🏠</Text>
+        <Text style={styles.sectionTitle}> Houses </Text>
         {info.houses.length === 0 ? (
           <EmptyState type="house" />
         ) : (
           <FlatList data={info.houses} renderItem={renderHouses} keyExtractor={item => item.id.toString()} />
         )}
 
-        <Text style={styles.sectionTitle}> Boarding Houses 🏢 </Text>
+        <Text style={styles.sectionTitle}> Boarding Houses  </Text>
         {info.boarding_houses.length === 0 ? (
           <EmptyState type="boardinghouse" />
         ) : (

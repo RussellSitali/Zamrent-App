@@ -62,7 +62,7 @@ export default function PasswordScreen() {
       <TextInput
         secureTextEntry
         placeholder="New Password"
-        placeholderTextColor="#999"
+        placeholderTextColor="#000"
         value={password}
         onChangeText={setPassword}
         style={{
@@ -76,7 +76,7 @@ export default function PasswordScreen() {
       <TextInput
         secureTextEntry
         placeholder="Confirm Password"
-        placeholderTextColor="#999"
+        placeholderTextColor="#000"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         style={{
