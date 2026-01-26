@@ -18,7 +18,7 @@ export default function VerifyListingDecider() {
       pathname:
         verificationType === "basic"
           ? "/screens/basicVerification"
-          : "/screens/verify-trusted",
+          : "/screens/trustedverification",
       params: {
         property_id,
         owner_id,
@@ -27,6 +27,7 @@ export default function VerifyListingDecider() {
       },
     });
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

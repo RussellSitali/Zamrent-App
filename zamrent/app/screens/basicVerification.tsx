@@ -11,8 +11,10 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function BasicVerificationScreen() {
+  const baseURL = process.env.EXPO_PUBLIC_API_URL;
   const router = useRouter();
   const { property_id, owner_id, property_type } = useLocalSearchParams();
 
@@ -20,6 +22,7 @@ export default function BasicVerificationScreen() {
   const [selfieWithNrc, setSelfieWithNrc] = useState(null);
   const [outsidePhoto, setOutsidePhoto] = useState(null);
   const [insidePhotos, setInsidePhotos] = useState([]);
+
 
   const pickSingleImage = async (setter) => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -98,54 +101,81 @@ export default function BasicVerificationScreen() {
     return uploadedImages;
   };
 
-  const handleSubmit = async () => {
-    if (!nrcFront || !selfieWithNrc || !outsidePhoto || insidePhotos.length !== 2) {
-      Alert.alert(
-        "Incomplete submission",
-        "Please upload all required photos before submitting."
-      );
-      return;
-    }
+    const handleSubmit = async () => {
+        const token = await AsyncStorage.getItem("userToken"); 
 
-    try {
-      const allImages = [
-        { image: nrcFront, category: "nrc_front" },
-        { image: selfieWithNrc, category: "selfie_with_nrc" },
-        { image: outsidePhoto, category: "outside_property" },
-        ...insidePhotos.map((img) => ({
-          image: img,
-          category: "inside_property",
-        })),
-      ];
+        if (!nrcFront || !selfieWithNrc || !outsidePhoto || insidePhotos.length !== 2) {
+          Alert.alert(
+            "Incomplete submission",
+            "Please upload all required photos before submitting."
+          );
+          return;
+        }
 
-      const uploaded = [];
+        try {
+          // 1️⃣ Prepare images with categories
+          const allImages = [
+            { image: nrcFront, category: "nrc_front" },
+            { image: selfieWithNrc, category: "selfie_with_nrc" },
+            { image: outsidePhoto, category: "outside_property" },
+            ...insidePhotos.map((img) => ({
+              image: img,
+              category: "inside_property",
+            })),
+          ];
 
-      for (const item of allImages) {
-        const [uploadedImage] = await uploadImagesToCloudinary([item.image]);
-        uploaded.push({
-          ...uploadedImage,
-          category: item.category,
-        });
-      }
+          // 2️⃣ Upload to Cloudinary
+          const uploaded = [];
 
-      console.log("Uploaded Basic Verification:", {
-        property_id,
-        owner_id,
-        verification_type: "basic",
-        images: uploaded,
-      });
+          for (const item of allImages) {
+            const [uploadedImage] = await uploadImagesToCloudinary([item.image]);
 
-      Alert.alert(
-        "Submitted",
-        "Your basic verification has been submitted and is pending review."
-      );
+            uploaded.push({
+              image_url: uploadedImage.image_url,
+              public_id: uploadedImage.public_id,
+              category: item.category,
+            });
+          }
 
-      router.back();
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Upload failed", error.message);
-    }
-  };
+          // 3️⃣ SEND TO BACKEND (THIS IS WHAT WAS MISSING)
+          const response = await fetch(
+            `${baseURL}/api/basicverifications`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                property_id,
+                owner_id,
+                property_type,
+                verification_type: "basic",
+                images: uploaded,
+              }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "Verification submission failed");
+          }
+
+          // 4️⃣ Success
+          Alert.alert(
+            "Submitted",
+            "Your basic verification has been submitted and is pending review."
+          );
+
+          router.replace("/(tabs)/Profile");
+
+        } catch (error) {
+          console.error("Verification error:", error);
+          Alert.alert("Upload failed", error.message);
+        }
+      };
+
 
   const renderImage = (img) =>
     img && <Image source={{ uri: img.uri }} style={styles.preview} />;

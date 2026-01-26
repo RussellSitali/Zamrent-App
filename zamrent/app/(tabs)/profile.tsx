@@ -17,13 +17,27 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const getVerificationStage = (status?: string) => {
+  switch (status) {
+    case "pending":
+      return { label: "Pending Verification", color: "#3498db" }; // blue
+    case "verified":
+      return { label: "Verified", color: "#2ecc71" }; // green
+    case "rejected":
+      return { label: "Rejected", color: "#e74c3c" }; // red
+    default:
+      return { label: "Unverified", color: "#f1c40f" }; // yellow
+    }
+  };
+
+
   const verifyListing = (propertyId, propertyType, ownerId) => {
     router.push({
       pathname: "/screens/verifydecider",
       params: {
-        id: propertyId,
-        type: propertyType,
-        ownerId: ownerId,
+        property_id: propertyId,
+        property_type: propertyType,
+        owner_id: ownerId,
         },
       });
     };
@@ -135,6 +149,7 @@ export default function Profile() {
     const fallbackImage = "https://placehold.co/600x400?text=No+House+Image";
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const rentStatus = item.status ? "Rented" : "Available";
+    const { label, color } = getVerificationStage(item.verification_status);
 
 
     return (
@@ -154,12 +169,27 @@ export default function Profile() {
             {rentStatus}
           </Text>
 
-        <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5}}>
+        <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5, marginBottom:5}}>
           <Text style={{ color:"blue", fontSize:16,}}>
             {item.status ? "Mark as Available" : "Mark as Rented"}
           </Text>
         </TouchableOpacity>
-                 
+            
+            <View
+                style={{
+                  alignSelf: "flex-start",
+                  backgroundColor: color,
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 4,
+                  marginBottom: 6,
+                }}
+              >
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+                {label}
+              </Text>
+            </View>
+
         {/* LISTING ACTIONS */}
         {item.listing_verified === false ? (
           // STEP 1: VERIFY FIRST
@@ -216,6 +246,7 @@ export default function Profile() {
     const fallbackImage = "https://placehold.co/600x400?text=No+BoardingHouse+Image";
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const availableBeds = item.bedspaces_available; 
+    const { label, color } = getVerificationStage(item.verification_status);
 
     return (
       <View style={styles.listItem}>
@@ -246,6 +277,22 @@ export default function Profile() {
               <Text style={{color:"blue"}}>Update</Text>
             </TouchableOpacity>
           </View>
+
+
+            <View
+                style={{
+                    alignSelf: "flex-start",
+                    backgroundColor: color,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 4,
+                    marginBottom: 6,
+                  }}
+                >
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+                  {label}
+                </Text>
+            </View>
 
 
           {/* LISTING ACTIONS */}

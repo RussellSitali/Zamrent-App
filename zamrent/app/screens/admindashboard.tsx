@@ -64,7 +64,7 @@ export default function AdminDashboard() {
       <View style={styles.statsGrid}>
         <StatCard label="Total Users" value={stats?.totalUsers} />
         <StatCard label="Total Listings" value={stats?.totalListings} />
-        <StatCard label="Verified Users" value={stats?.verifiedUsers} />
+        <StatCard label="Verified Listings" value={stats?.verifiedUsers} />
         <StatCard
           label="Pending Verifications"
           value={stats?.pendingVerifications}
