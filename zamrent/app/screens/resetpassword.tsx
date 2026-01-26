@@ -31,7 +31,7 @@ export default function ForgotPasswordScreen() {
       setEmail(""); 
 
       if (response.ok) {
-        // Navigate to the screen where the user enters the new passwword
+        // Navigate to the screen where the user enters the resetcode
         router.push({
           pathname: "/screens/enterresetcode",
           params: { email }, 

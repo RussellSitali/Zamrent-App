@@ -12,7 +12,7 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/7f312cf1-3a74-4ab5-9c61-f894852eeec1"
+      "url": "https://u.expo.dev/fdf3cb94-ab08-40f5-b9e6-a316ee213208"
     },
     "ios": {
       "supportsTablet": true
@@ -61,11 +61,12 @@
         }
       },
       "eas": {
-        "projectId": "7f312cf1-3a74-4ab5-9c61-f894852eeec1"
+        "projectId": "fdf3cb94-ab08-40f5-b9e6-a316ee213208"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "owner": "russell2000"
   }
 }

@@ -269,10 +269,12 @@ reportButton: {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
-  paddingVertical: 12,
-  borderRadius: 8,
+  paddingVertical: 14,
+  paddingHorizontal: 16,
+  borderRadius: 10,
   borderWidth: 1,
   borderColor: "#dc3545",
+  backgroundColor: "#fff5f5", // soft red background
 },
 
 reportIcon: {
@@ -282,8 +284,9 @@ reportIcon: {
 
 reportText: {
   fontSize: 16,
-  fontWeight: "600",
+  fontWeight: "700",
   color: "#dc3545",
+  letterSpacing: 0.3,
 },
 
 reportSubText: {
@@ -305,8 +308,9 @@ reportSubText: {
   },
 
   image: {
-    width: Dimensions.get("window").width - 40,
-    height: 200,
+    // width: Dimensions.get("window").width - 40,
+    width:"100%",
+    height: "100%",
     borderRadius: 10,
     resizeMode: "cover",
     marginBottom: 0,

@@ -5,7 +5,7 @@ export default function SupportScreen() {
   const router = useRouter();
 
   const handleCall = () => {
-    Linking.openURL("tel:+260970337049");
+    Linking.openURL("tel:+260570003287");
   };
 
   const handleEmail = () => {
@@ -13,7 +13,7 @@ export default function SupportScreen() {
   };
 
   const handleWhatsApp = () => {
-    const phoneNumber = "+260570003287";
+    const phoneNumber = "+260970337049";
     Linking.openURL(`https://wa.me/${phoneNumber}`);
   };
 
@@ -40,7 +40,7 @@ export default function SupportScreen() {
       {/* FAQs */}
       <Text style={{ fontSize: 18, marginVertical: 20 }}>FAQs</Text>
       <Text>- How do I search for a house? Use the search bar on Home.</Text>
-      <Text>- How do I list my property? Go to Profile > Add Listing.</Text>
+      <Text>- How do I list my property? Go to Profile . Add Listing.</Text>
       <Text>- How do I reset my password? Use 'Forgot Password' on Sign In.</Text>
 
       {/* Report a Problem */}

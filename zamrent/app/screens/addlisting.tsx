@@ -105,6 +105,13 @@ export default function AddListing() {
         return;
       }
 
+      if (!images || images.length === 0) {
+          setError("Please upload at least one image");
+          setLoading(false);
+        return;
+      }
+
+
      // Upload images to Cloudinary
   
           const uploadedImages = [];

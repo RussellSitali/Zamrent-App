@@ -17,6 +17,17 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const verifyListing = (propertyId, propertyType, ownerId) => {
+    router.push({
+      pathname: "/screens/verifydecider",
+      params: {
+        id: propertyId,
+        type: propertyType,
+        ownerId: ownerId,
+        },
+      });
+    };
+
   
   const fetchUserListings = async () => {
     try {
@@ -148,6 +159,43 @@ export default function Profile() {
             {item.status ? "Mark as Available" : "Mark as Rented"}
           </Text>
         </TouchableOpacity>
+                 
+        {/* LISTING ACTIONS */}
+        {item.listing_verified === false ? (
+          // STEP 1: VERIFY FIRST
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#2ecc71", // green
+              paddingVertical: 10,
+              borderRadius: 6,
+              marginTop: 10,
+              alignItems: "center",
+            }}
+            onPress={() => verifyListing(item.id, "house", item.owner_id)}
+          >
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+              Verify Listing
+            </Text>
+          </TouchableOpacity>
+        ) : item.paid_for === false ? (
+          // STEP 2: PAY AFTER VERIFICATION
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#f39c12", // orange
+              paddingVertical: 10,
+              borderRadius: 6,
+              marginTop: 10,
+              alignItems: "center",
+            }}
+            onPress={() => payForListing(item.id, "house", item.owner_id)}
+          >
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+              Pay for Listing
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+
+
 
         </View>
 
@@ -162,6 +210,7 @@ export default function Profile() {
       </View>
     );
   };
+
 
   const renderBoardingHouses = ({ item }) => {
     const fallbackImage = "https://placehold.co/600x400?text=No+BoardingHouse+Image";
@@ -197,6 +246,45 @@ export default function Profile() {
               <Text style={{color:"blue"}}>Update</Text>
             </TouchableOpacity>
           </View>
+
+
+          {/* LISTING ACTIONS */}
+          {item.listing_verified === false ? (
+            // STEP 1: VERIFY FIRST
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#2ecc71", // green
+                paddingVertical: 10,
+                borderRadius: 6,
+                marginTop: 10,
+                alignItems: "center",
+              }}
+              onPress={() => verifyListing(item.id, "boarding_house", item.owner_id)}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                Verify Listing
+              </Text>
+            </TouchableOpacity>
+          ) : item.paid_for === false ? (
+            // STEP 2: PAY AFTER VERIFICATION
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#f39c12", // orange
+                paddingVertical: 10,
+                borderRadius: 6,
+                marginTop: 10,
+                alignItems: "center",
+              }}
+              onPress={() => payForListing(item.id, "boarding_house", item.owner_id)}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                Pay for Listing
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+
+         
+
         </View>
 
         <View style={styles.buttonRow}>

@@ -92,8 +92,9 @@ export default function AdminLoginScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={handleAccount}>
-        <View>Account</View>
+          <Text style={styles.buttonaccount}>Account</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
