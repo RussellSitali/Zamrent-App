@@ -108,7 +108,8 @@ export default function EditHouse() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      quality: 1,
+      quality: 0.6,
+      exif: false,
     });
 
     if (!result.canceled) {

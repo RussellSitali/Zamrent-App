@@ -77,7 +77,8 @@ export default function AddListing() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      quality: 1,
+      quality: 0.6,
+      exif: false,
     });
     if (!result.canceled) {
       setImages((prev) => [...prev, ...result.assets]);

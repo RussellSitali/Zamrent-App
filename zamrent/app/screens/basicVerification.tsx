@@ -28,6 +28,7 @@ export default function BasicVerificationScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
+      exif: false,
     });
 
     if (!result.canceled) {

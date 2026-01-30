@@ -61,16 +61,29 @@ export default function AdminDashboard() {
       </View>
 
       {/* ================= STATS ================= */}
-      <View style={styles.statsGrid}>
+    <View style={styles.statsGrid}>
         <StatCard label="Total Users" value={stats?.totalUsers} />
+
         <StatCard label="Total Listings" value={stats?.totalListings} />
-        <StatCard label="Verified Listings" value={stats?.verifiedUsers} />
+
         <StatCard
-          label="Pending Verifications"
-          value={stats?.pendingVerifications}
+          label="Verified Listings"
+          value={stats?.verifiedListings}
+        />
+
+        <StatCard
+          label="Pending Listings"
+          value={stats?.pendingListings}
           highlight
         />
-      </View>
+
+        <StatCard
+          label="Rejected Listings"
+          value={stats?.rejectedListings}
+        />
+
+    </View>
+
 
       {/* ================= QUICK ACTIONS ================= */}
       <View style={styles.section}>

@@ -41,11 +41,6 @@ export default function AdminLoginScreen() {
         await AsyncStorage.setItem("adminId", String(data.adminId));
         await AsyncStorage.setItem("adminRole", data.role);
 
-        console.log("Logging the data", data);
-        console.log("Logging the adminToken", data.token);
-        console.log("Logging the adminId", data.adminId);
-        console.log("Logging the role", data.role);
-
         alert("Admin login successful");
 
         // Navigate to dashboard
