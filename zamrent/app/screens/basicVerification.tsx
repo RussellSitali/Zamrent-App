@@ -12,6 +12,7 @@ import {
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native";
 
 export default function BasicVerificationScreen() {
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
@@ -22,7 +23,11 @@ export default function BasicVerificationScreen() {
   const [selfieWithNrc, setSelfieWithNrc] = useState(null);
   const [outsidePhoto, setOutsidePhoto] = useState(null);
   const [insidePhotos, setInsidePhotos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // ✅ NEW
+  const [serverMessage, setServerMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   const pickSingleImage = async (setter) => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -102,81 +107,83 @@ export default function BasicVerificationScreen() {
     return uploadedImages;
   };
 
-    const handleSubmit = async () => {
-        const token = await AsyncStorage.getItem("userToken"); 
+  const handleSubmit = async () => {
+    const token = await AsyncStorage.getItem("userToken");
 
-        if (!nrcFront || !selfieWithNrc || !outsidePhoto || insidePhotos.length !== 2) {
-          Alert.alert(
-            "Incomplete submission",
-            "Please upload all required photos before submitting."
-          );
-          return;
-        }
+    setServerMessage(""); // ✅ reset message
+    setIsLoading(true);
 
-        try {
-          // 1️⃣ Prepare images with categories
-          const allImages = [
-            { image: nrcFront, category: "nrc_front" },
-            { image: selfieWithNrc, category: "selfie_with_nrc" },
-            { image: outsidePhoto, category: "outside_property" },
-            ...insidePhotos.map((img) => ({
-              image: img,
-              category: "inside_property",
-            })),
-          ];
+    if (!nrcFront || !selfieWithNrc || !outsidePhoto || insidePhotos.length !== 2) {
+      Alert.alert(
+        "Incomplete submission",
+        "Please upload all required photos before submitting."
+      );
+      setIsLoading(false);
+      return;
+    }
 
-          // 2️⃣ Upload to Cloudinary
-          const uploaded = [];
+    try {
+      const allImages = [
+        { image: nrcFront, category: "nrc_front" },
+        { image: selfieWithNrc, category: "selfie_with_nrc" },
+        { image: outsidePhoto, category: "outside_property" },
+        ...insidePhotos.map((img) => ({
+          image: img,
+          category: "inside_property",
+        })),
+      ];
 
-          for (const item of allImages) {
-            const [uploadedImage] = await uploadImagesToCloudinary([item.image]);
+      const uploaded = [];
 
-            uploaded.push({
-              image_url: uploadedImage.image_url,
-              public_id: uploadedImage.public_id,
-              category: item.category,
-            });
-          }
+      for (const item of allImages) {
+        const [uploadedImage] = await uploadImagesToCloudinary([item.image]);
 
-          // 3️⃣ SEND TO BACKEND (THIS IS WHAT WAS MISSING)
-          const response = await fetch(
-            `${baseURL}/api/basicverifications`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                property_id,
-                owner_id,
-                property_type,
-                verification_type: "basic",
-                images: uploaded,
-              }),
-            }
-          );
+        uploaded.push({
+          image_url: uploadedImage.image_url,
+          public_id: uploadedImage.public_id,
+          category: item.category,
+        });
+      }
 
-          const data = await response.json();
+      const response = await fetch(`${baseURL}/api/basicverifications`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          property_id,
+          owner_id,
+          property_type,
+          verification_type: "basic",
+          images: uploaded,
+        }),
+      });
 
-          if (!response.ok) {
-            throw new Error(data.message || "Verification submission failed");
-          }
+      const data = await response.json();
 
-          // 4️⃣ Success
-          Alert.alert(
-            "Submitted",
-            "Your basic verification has been submitted and is pending review."
-          );
+      if (!response.ok) {
+        throw new Error(data.message || "Verification submission failed");
+      }
 
-          router.replace("/(tabs)/Profile");
+      // ✅ SUCCESS MESSAGE
+      setMessageType("success");
+      setServerMessage(
+        "Your verification has been submitted and is pending review."
+      );
 
-        } catch (error) {
-          console.error("Verification error:", error);
-          Alert.alert("Upload failed", error.message);
-        }
-      };
+      setTimeout(() => {
+        router.replace("/(tabs)/Profile");
+      }, 1500);
 
+    } catch (error) {
+      console.error("Verification error:", error);
+
+      // ✅ ERROR MESSAGE
+      setMessageType("error");
+      setServerMessage(error.message || "Something went wrong. Please try again.");
+    }
+  };
 
   const renderImage = (img) =>
     img && <Image source={{ uri: img.uri }} style={styles.preview} />;
@@ -196,18 +203,12 @@ export default function BasicVerificationScreen() {
       </TouchableOpacity>
       {renderImage(nrcFront)}
 
-      <TouchableOpacity
-        style={styles.uploadBtn}
-        onPress={() => pickSingleImage(setSelfieWithNrc)}
-      >
+      <TouchableOpacity style={styles.uploadBtn} onPress={() => pickSingleImage(setSelfieWithNrc)}>
         <Text>Selfie Holding NRC</Text>
       </TouchableOpacity>
       {renderImage(selfieWithNrc)}
 
-      <TouchableOpacity
-        style={styles.uploadBtn}
-        onPress={() => pickSingleImage(setOutsidePhoto)}
-      >
+      <TouchableOpacity style={styles.uploadBtn} onPress={() => pickSingleImage(setOutsidePhoto)}>
         <Text>Photo Outside Property</Text>
       </TouchableOpacity>
       {renderImage(outsidePhoto)}
@@ -222,37 +223,103 @@ export default function BasicVerificationScreen() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Submit Verification</Text>
+      <TouchableOpacity 
+        style={[styles.submitBtn, isLoading && styles.disabledBtn]}
+        onPress={handleSubmit}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator color="#fff" style={{ marginRight: 8 }} />
+        <Text style={styles.submitText}>Submitting...</Text>
+      </View>
+    ) : (
+      <Text style={styles.submitText}>Submit Verification</Text>
+    )}
       </TouchableOpacity>
+
+      {/* ✅ RESPONSE MESSAGE */}
+      {serverMessage ? (
+        <Text
+          style={[
+            styles.responseText,
+            messageType === "success" ? styles.successText : styles.errorText,
+          ]}
+        >
+          {serverMessage}
+        </Text>
+      ) : null}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: "#f7f7f7" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 6 },
-  note: { fontSize: 13, color: "#555", marginBottom: 16 },
+  container: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  note: {
+    color: "#555",
+    marginBottom: 20,
+  },
   uploadBtn: {
-    backgroundColor: "#e0e0e0",
-    padding: 14,
+    backgroundColor: "#eee",
+    padding: 15,
     borderRadius: 8,
     marginBottom: 10,
-    alignItems: "center",
   },
-  preview: { width: "100%", height: 200, borderRadius: 8, marginBottom: 10 },
-  previewSmall: {
-    width: 100,
-    height: 100,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  row: { flexDirection: "row", marginBottom: 16 },
-  submitBtn: {
-    backgroundColor: "#2a2a72",
-    padding: 16,
+  preview: {
+    width: "100%",
+    height: 180,
     borderRadius: 10,
-    alignItems: "center",
+    marginBottom: 10,
   },
-  submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  row: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  previewSmall: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  submitBtn: {
+    backgroundColor: "#2f95dc",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  submitText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+
+  // ✅ NEW STYLES
+  responseText: {
+    marginTop: 12,
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  successText: {
+    color: "#16a34a",
+    fontWeight: "600",
+  },
+  errorText: {
+    color: "#dc2626",
+    fontWeight: "600",
+  },
+  disabledBtn: {
+  backgroundColor: "#ccc", 
+  padding: 15,
+  borderRadius: 10,
+  marginTop: 20,
+  opacity: 0.7,
+},
 });

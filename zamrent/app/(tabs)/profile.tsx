@@ -17,21 +17,36 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const getDaysRemaining = (expiryDate) => {
+      if (!expiryDate) return null;
+
+      const now = new Date();
+      const expiry = new Date(expiryDate);
+
+      const diffTime = expiry - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return diffDays;
+   };
+
+
   const getVerificationStage = (status?: string) => {
   switch (status) {
     case "pending":
-      return { label: "Pending Verification", color: "#3498db" }; // blue
-    case "verified":
-      return { label: "Verified", color: "#2ecc71" }; // green
+      return { label: "Pending Verification", color: "#3498db" };
+    case "approved":
+      return { label: "Property Verified ☑️", color: "#2ecc71" };
     case "rejected":
-      return { label: "Rejected", color: "#e74c3c" }; // red
+      return { label: "Property Rejected ✖️", color: "#e74c3c" }; 
     default:
-      return { label: "Unverified", color: "#f1c40f" }; // yellow
+      return { label: "Property is Unverified", color: "#f1c40f" };
     }
   };
 
 
   const verifyListing = (propertyId, propertyType, ownerId) => {
+    console.log(propertyId, propertyType, ownerId );
+
     router.push({
       pathname: "/screens/verifydecider",
       params: {
@@ -150,7 +165,7 @@ export default function Profile() {
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
     const rentStatus = item.status ? "Rented" : "Available";
     const { label, color } = getVerificationStage(item.verification_status);
-
+    console.log(" 1 ",item.verification_expires_at, '2',item.verification_status)
 
     return (
       <View style={styles.listItem}>
@@ -183,50 +198,51 @@ export default function Profile() {
                   paddingVertical: 4,
                   borderRadius: 4,
                   marginBottom: 6,
+                  marginTop:5
                 }}
               >
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 20 }}>
                 {label}
               </Text>
             </View>
 
         {/* LISTING ACTIONS */}
-        {item.listing_verified === false ? (
-          // STEP 1: VERIFY FIRST
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#2ecc71", // green
-              paddingVertical: 10,
-              borderRadius: 6,
-              marginTop: 10,
-              alignItems: "center",
-            }}
-            onPress={() => verifyListing(item.id, "house", item.owner_id)}
-          >
-            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-              Verify Listing
+        {item.verification_status === 'unverified' ? (
+            // NOT VERIFIED → SHOW BUTTON
+            <TouchableOpacity
+              style={{
+                backgroundColor: "purple",
+                paddingVertical: 10,
+                borderRadius: 6,
+                marginTop: 10,
+                alignItems: "center",
+              }}
+              onPress={() => verifyListing(item.id, "house", item.owner_id)}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                Verify Property
+              </Text>
+            </TouchableOpacity>
+          ) : (
+          <Text></Text>
+          )}
+
+          {item.verification_expires_at?(
+              <Text
+              style={{
+                marginTop: 10,
+                fontSize: 14,
+                color: "#555",
+                textAlign: "center",
+              }}
+            >
+              Verification active — expires in{" "}
+              {getDaysRemaining(item.verification_expires_at)} days
             </Text>
-          </TouchableOpacity>
-        ) : item.paid_for === false ? (
-          // STEP 2: PAY AFTER VERIFICATION
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#f39c12", // orange
-              paddingVertical: 10,
-              borderRadius: 6,
-              marginTop: 10,
-              alignItems: "center",
-            }}
-            onPress={() => payForListing(item.id, "house", item.owner_id)}
-          >
-            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-              Pay for Listing
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-
-
-
+          ):
+          (
+            <Text></Text>
+          )}
         </View>
 
         <View style={styles.buttonRow}>
@@ -248,6 +264,8 @@ export default function Profile() {
     const availableBeds = item.bedspaces_available; 
     const { label, color } = getVerificationStage(item.verification_status);
 
+    console.log(" 1 ",item.verification_expires_at, '2',item.verification_status)
+
     return (
       <View style={styles.listItem}>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
@@ -259,6 +277,7 @@ export default function Profile() {
           <Text style={styles.listPrice}>Description: {item.description}</Text>
           <Text style={styles.listPrice}>Location: {item.location}</Text>
            <Text style={styles.listPrice}>Price: K{item.price}</Text>
+          <Text style={styles.listPrice}>Total bedspaces{item.bed_spaces}</Text>
 
           <Text style={{ color: availableBeds > 0 ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
             {availableBeds} Bedspaces available
@@ -287,20 +306,21 @@ export default function Profile() {
                     paddingVertical: 4,
                     borderRadius: 4,
                     marginBottom: 6,
+                    marginTop:5
                   }}
                 >
-                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 20 }}>
                   {label}
                 </Text>
             </View>
 
 
           {/* LISTING ACTIONS */}
-          {item.listing_verified === false ? (
-            // STEP 1: VERIFY FIRST
+          {item.verification_status === 'unverified' ? (
+            // NOT VERIFIED → SHOW BUTTON
             <TouchableOpacity
               style={{
-                backgroundColor: "#2ecc71", // green
+                backgroundColor: "purple",
                 paddingVertical: 10,
                 borderRadius: 6,
                 marginTop: 10,
@@ -308,30 +328,30 @@ export default function Profile() {
               }}
               onPress={() => verifyListing(item.id, "boarding_house", item.owner_id)}
             >
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-                Verify Listing
+              <Text style={{ color: "#fff", fontSize: 17, fontWeight: "bold" }}>
+                Verify Property
               </Text>
             </TouchableOpacity>
-          ) : item.paid_for === false ? (
-            // STEP 2: PAY AFTER VERIFICATION
-            <TouchableOpacity
+          ) : (
+          <Text></Text>
+          )}
+
+          {item.verification_expires_at?(
+              <Text
               style={{
-                backgroundColor: "#f39c12", // orange
-                paddingVertical: 10,
-                borderRadius: 6,
                 marginTop: 10,
-                alignItems: "center",
+                fontSize: 20,
+                color: "#555",
+                textAlign: "center",
               }}
-              onPress={() => payForListing(item.id, "boarding_house", item.owner_id)}
             >
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-                Pay for Listing
-              </Text>
-            </TouchableOpacity>
-          ) : null}
-
-         
-
+            Verification expires in{" "}
+              {getDaysRemaining(item.verification_expires_at)} days
+            </Text>
+          ):
+          (
+            <Text></Text>
+          )}
         </View>
 
         <View style={styles.buttonRow}>

@@ -33,26 +33,27 @@ export default function PropertyDetailsScreen() {
       Linking.openURL(`https://wa.me/${propertyData.phone_number.replace(/\D/g, "")}`);
     }
   };
+  
+return (
+  <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
+    {/* Sticky Header */}
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Text style={styles.backText}>← Back</Text>
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>Property Details</Text>
+    </View>
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
-      {/* Sticky Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Property Details</Text>
-      </View>
-
-      <ScrollView
-        contentContainerStyle={{ padding: 10, paddingBottom: 50, marginTop:35 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Image Slider */}
-        <View style={styles.card}>
+    <ScrollView
+      contentContainerStyle={{ padding: 12, paddingBottom: 60, marginTop: 45 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Image Slider */}
+      <View style={styles.card}>
+        <View style={{ position: "relative" }}>
           <Swiper
-            style={{ height: 250 }}
-            dotColor="#ccc"
+            style={{ height: 280 }}
+            dotColor="#d1d5db"
             activeDotColor="#2f95dc"
             autoplay={false}
             loop={true}
@@ -71,171 +72,220 @@ export default function PropertyDetailsScreen() {
               </View>
             )}
           </Swiper>
-        </View>
 
-              {/* Property Info */}
-        <View style={styles.card}>
-
-          {/* Title */}
-          <Text style={{ fontSize: 22, color: "black", fontWeight: "900" }}>
-            {propertyData.title}
-          </Text>
-
-          {/* Description */}
-        <Text
+          {/* Price Badge */}
+          <View
             style={{
-              fontSize: 20, 
-              color: "grey", 
-              fontWeight: "600",
-              letterSpacing: 0.3,
-              marginBottom:0,
+              position: "absolute",
+              bottom: 14,
+              right: 14,
+              backgroundColor: "rgba(0,0,0,0.75)",
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 20,
             }}
           >
-            {propertyData.description || "No description available."}
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+              ZMW {propertyData.price} / month
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Property Info */}
+      <View style={styles.card}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "800",
+            color: "#111827",
+            marginBottom: 6,
+          }}
+        >
+          {propertyData.title}
         </Text>
 
+        <Text
+          style={{
+            fontSize: 16,
+            color: "#6b7280",
+            marginBottom: 12,
+          }}
+        >
+          {propertyData.location}
+        </Text>
 
-          {/* Location */}
-          <Text style={{ fontSize: 20, color: "grey", fontWeight: "600" }}>
-            {propertyData.location}
-          </Text>
+        <Text
+          style={{
+            fontSize: 17,
+            lineHeight: 24,
+            color: "#374151",
+            marginBottom: 14,
+          }}
+        >
+          {propertyData.description || "No description available."}
+        </Text>
 
-          {/* Bedrooms */}
+        {/* Info Chips */}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
           {propertyData.bedrooms ? (
-            <Text
+            <View
               style={{
-                color: "#696969",
-                fontSize: 20,
-                fontWeight: "500",
-                marginTop: 0,
+                backgroundColor: "#f1f5f9",
+                paddingVertical: 6,
+                paddingHorizontal: 14,
+                borderRadius: 20,
               }}
             >
-              {propertyData.bedrooms} Rooms
-            </Text>
+              <Text style={{ fontSize: 14, fontWeight: "600" }}>
+                🛏 {propertyData.bedrooms} Rooms
+              </Text>
+            </View>
           ) : null}
 
-          {/* Bathrooms */}
           {propertyData.bathrooms ? (
-            <Text
+            <View
               style={{
-                color: "grey",
-                fontSize: 20,
-                fontWeight: "600",
-                marginTop: 4,
+                backgroundColor: "#f1f5f9",
+                paddingVertical: 6,
+                paddingHorizontal: 14,
+                borderRadius: 20,
               }}
             >
-              {propertyData.bathrooms} bathrooms
-            </Text>
+              <Text style={{ fontSize: 14, fontWeight: "600" }}>
+                🚿 {propertyData.bathrooms} Bathrooms
+              </Text>
+            </View>
           ) : null}
 
-           {/* Price */}
-          <Text
-            style={{
-              fontSize: 22,
-              color: "grey",
-              marginTop: 5,
-              fontWeight: "600",
-            }}
-          >
-            ZMW {propertyData.price} /month
-          </Text>
-
-          {/* Distance */}
           {propertyData.distance !== undefined && (
-            <Text
+            <View
               style={{
-                fontStyle: "italic",
-                fontSize: 20,
-                color: "black",
-                marginTop: 8,
-                fontWeight:"400",
+                backgroundColor: "#f1f5f9",
+                paddingVertical: 6,
+                paddingHorizontal: 14,
+                borderRadius: 20,
               }}
             >
-              {propertyData.distance < 0.5
-                ? `Approximately ${(propertyData.distance * 1000).toFixed(
-                    0
-                  )} meters away from where you are`
-                : `Approximately ${propertyData.distance.toFixed(
-                    2
-                  )} km away from where you are`}
-            </Text>
+              <Text style={{ fontSize: 14, fontWeight: "600" }}>
+                📍 {propertyData.distance < 0.5
+                  ? `${(propertyData.distance * 1000).toFixed(0)} m away`
+                  : `${propertyData.distance.toFixed(2)} km away`}
+              </Text>
+            </View>
           )}
+        </View>
 
-           {/* Status / Bedspaces */}
-          {propertyData.type === "house" ? (
-            propertyData.status ? (
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 20,
-                  fontWeight: "600",
-                  marginTop: 10,
-                }}
-              >
+        {/* Status */}
+        {propertyData.type === "house" ? (
+          propertyData.status ? (
+            <View
+              style={{
+                marginTop: 14,
+                backgroundColor: "#fee2e2",
+                paddingVertical: 6,
+                paddingHorizontal: 14,
+                borderRadius: 20,
+                alignSelf: "flex-start",
+              }}
+            >
+              <Text style={{ color: "#b91c1c", fontWeight: "700" }}>
                 Rented ❌
               </Text>
-            ) : (
-              <Text
-                style={{
-                  color: "green",
-                  fontSize: 20,
-                  fontWeight: "600",
-                  marginTop: 10,
-                }}
-              >
-                Available ✅
-              </Text>
-            )
-          ) : propertyData.type === "boardinghouse" ? (
-            <Text
+            </View>
+          ) : (
+            <View
               style={{
-                fontSize: 20,
-                fontWeight: "600",
-                marginTop: 10,
-                color: "black",
+                marginTop: 14,
+                backgroundColor: "#dcfce7",
+                paddingVertical: 6,
+                paddingHorizontal: 14,
+                borderRadius: 20,
+                alignSelf: "flex-start",
               }}
             >
+              <Text style={{ color: "#166534", fontWeight: "700" }}>
+                Available ✅
+              </Text>
+            </View>
+          )
+        ) : propertyData.type === "boardinghouse" ? (
+          <View
+            style={{
+              marginTop: 14,
+              backgroundColor: "#e0f2fe",
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 20,
+              alignSelf: "flex-start",
+            }}
+          >
+            <Text style={{ fontWeight: "700" }}>
               Bedspaces available: {propertyData.bedspaces_available}
             </Text>
-          ) : null}
-
-        </View>
-
-        {/* Contact Buttons */}
-        <View style={styles.card}>
-          <Text style={styles.sectionHeader}>Contact Owner</Text>
-          <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 10 }}>
-            <TouchableOpacity style={styles.contactButton} onPress={handleCall}>
-              <Text style={styles.contactText}>📞 Call</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.contactButton, { backgroundColor: "#25D366" }]} onPress={handleWhatsApp}>
-              <Text style={styles.contactText}>💬 WhatsApp</Text>
-            </TouchableOpacity>
           </View>
-           <TouchableOpacity
-              style={styles.reportButton}
-              onPress={() =>
-                router.push({
-                  pathname: "/screens/reportpage",
-                  params: {
-                    listing_id: propertyData.id,
-                    owner_phone: propertyData.phone_number,
-                    title: propertyData.title,
-                  },
-                })
-              }
-            >
-              <Text style={styles.reportIcon}>⚠️</Text>
-              <Text style={styles.reportText}>Report this listing</Text>
-            </TouchableOpacity>
+        ) : null}
+      </View>
 
-            <Text style={styles.reportSubText}>
-              Something wrong or suspicious about this property?
-            </Text>
+      {/* Contact Section */}
+      <View style={styles.card}>
+        <Text style={styles.sectionHeader}>Contact Owner</Text>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 14,
+          }}
+        >
+          <TouchableOpacity
+            style={[styles.contactButton, { borderRadius: 30 }]}
+            onPress={handleCall}
+          >
+            <Text style={styles.contactText}>📞 Call</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.contactButton,
+              { backgroundColor: "#25D366", borderRadius: 30 },
+            ]}
+            onPress={handleWhatsApp}
+          >
+            <Text style={styles.contactText}>💬 WhatsApp</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+
+        <TouchableOpacity
+          style={[styles.reportButton, { marginTop: 20 }]}
+          onPress={() =>
+            router.push({
+              pathname: "/screens/reportpage",
+              params: {
+                listing_id: propertyData.id,
+                owner_phone: propertyData.phone_number,
+                title: propertyData.title,
+              },
+            })
+          }
+        >
+          <Text style={styles.reportIcon}>⚠️</Text>
+          <Text style={styles.reportText}>Report this listing</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.reportSubText}>
+          Something wrong or suspicious about this property?
+        </Text>
+      </View>
+    </ScrollView>
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -263,6 +313,21 @@ const styles = StyleSheet.create({
   marginBottom: 20,
   borderWidth: 1,
   borderColor: "#f5c6cb",
+},
+priceBadge: {
+  position: "absolute",
+  bottom: 12,
+  right: 12,
+  backgroundColor: "rgba(0,0,0,0.75)",
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 20,
+},
+
+priceBadgeText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "700",
 },
 
 reportButton: {
@@ -327,7 +392,7 @@ reportSubText: {
     marginBottom: 10,
   },
 
-  title: { fontSize: 17, fontWeight:"900", marginBottom: 5 },
+  title: { fontSize: 24,fontWeight: "800",marginBottom: 6,},
   price: { fontSize: 21, color: "black", marginBottom: 0, },
   sectionHeader: { fontSize: 18, fontWeight: "600", marginTop: 10 },
   description: { fontSize: 20, marginTop: 5 , fontWeight:"500"},

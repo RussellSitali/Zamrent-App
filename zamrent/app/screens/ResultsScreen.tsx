@@ -110,7 +110,7 @@ export default function SearchResultsScreen() {
                 marginTop: 6,
               }}
             >
-              {item.distance < 0.5
+              📍{item.distance < 0.5
                 ? `Approximately ${(item.distance * 1000).toFixed(
                     0
                   )} meters away`
