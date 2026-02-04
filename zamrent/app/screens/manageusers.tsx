@@ -96,8 +96,25 @@ export default function ManageUsersScreen() {
             }
           }
 
+      const verifyUser = async (userId) => {
+        
+        try {
+          const res = await fetch(`${baseURL}/api/admin/usersemail/${userId}/verify`, {
+            method: "PATCH",
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert(`Email verified`);
+          } else {
+            alert(data.message);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+
   const handleUnbanUser = async (userId) => {
-    console.log("Unban was clicked ", userId);
 
             try {
               const token = await AsyncStorage.getItem("adminToken");
@@ -206,6 +223,13 @@ export default function ManageUsersScreen() {
                       <Text style={styles.btnText}>Unban</Text>
                     </TouchableOpacity>
                   )}
+                  
+                  <TouchableOpacity
+                      style={styles.unbanBtn}
+                      onPress={() => verifyUser(user.id)}
+                    >
+                      <Text style={styles.btnText}>Email activation</Text>
+                    </TouchableOpacity>
                 </View>
               </View>
             ))}
