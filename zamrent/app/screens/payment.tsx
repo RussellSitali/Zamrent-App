@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingTop: 40, // add some space for back button
+    paddingTop: 40, 
   },
   backButton: {
     position: "absolute",

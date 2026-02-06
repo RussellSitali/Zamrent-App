@@ -243,7 +243,7 @@ export default function EditHouse() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 , paddingTop:20,}}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Edit House</Text>
 

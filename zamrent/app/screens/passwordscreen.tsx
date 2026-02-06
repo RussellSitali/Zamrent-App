@@ -63,6 +63,9 @@ export default function PasswordScreen() {
         secureTextEntry
         placeholder="New Password"
         placeholderTextColor="#000"
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={password}
         onChangeText={setPassword}
         style={{
@@ -70,6 +73,7 @@ export default function PasswordScreen() {
           marginBottom: 10,
           padding: 10,
           borderRadius: 5,
+          color:"#000"
         }}
       />
 
@@ -77,6 +81,9 @@ export default function PasswordScreen() {
         secureTextEntry
         placeholder="Confirm Password"
         placeholderTextColor="#000"
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         style={{
@@ -84,6 +91,7 @@ export default function PasswordScreen() {
           marginBottom: 20,
           padding: 10,
           borderRadius: 5,
+          color:"#000"
         }}
       />
 

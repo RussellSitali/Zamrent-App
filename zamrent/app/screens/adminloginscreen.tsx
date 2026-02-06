@@ -67,7 +67,10 @@ export default function AdminLoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={password}
         onChangeText={setPassword}
         placeholderTextColor="#000"
@@ -76,7 +79,10 @@ export default function AdminLoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Secret pass"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={secretpass}
         onChangeText={setSecretpass}
         placeholderTextColor="#000"
@@ -116,7 +122,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     fontSize: 16,
-    color: "#333",
+    color: "#131111",
   },
   button: {
     backgroundColor: "#2a2a72",

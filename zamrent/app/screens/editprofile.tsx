@@ -22,7 +22,7 @@ export default function EditProfile() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   backButton: {
-    marginTop: 50,        // adjust depending on status bar
+    marginTop: 50,        
     marginLeft: 20,
   },
   backText: {

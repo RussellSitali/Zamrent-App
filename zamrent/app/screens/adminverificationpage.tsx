@@ -102,7 +102,7 @@ export default function AdminVerificationsScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 , paddingTop:25,}}>
       {/* SEARCH SECTION */}
       <View style={styles.searchBox}>
         <TextInput

@@ -15,7 +15,7 @@ export default function SearchResultsScreen() {
   const finalData = JSON.parse(results);
   const router = useRouter();
 
-  console.log("Here is the bingo cart ",finalData)
+
 
   const renderItem = ({ item }) => {
     const coverImage = item.images?.[0] || null;
@@ -160,7 +160,7 @@ export default function SearchResultsScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", paddingTop: 20, }}>
       {/* HEADER */}
       <View
         style={{

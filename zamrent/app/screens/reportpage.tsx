@@ -70,7 +70,7 @@ export default function ReportScreen() {
         };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5", paddingTop: 20 }}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Header */}
         <Text style={styles.header}>Report Listing</Text>

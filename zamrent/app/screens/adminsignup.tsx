@@ -62,6 +62,7 @@ export default function AdminSignupScreen() {
         style={styles.input}
         placeholder="Username"
         placeholderTextColor="#000"
+        secureTextEntry={true}
         value={username}
         onChangeText={setUsername}
       />
@@ -69,7 +70,7 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Admin Email"
-        secureTextEntry
+        secureTextEntry={true}
         value={email}
         onChangeText={setEmail}
         placeholderTextColor="#000"
@@ -78,7 +79,10 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={password}
         onChangeText={setPassword}
         placeholderTextColor="#000"
@@ -87,7 +91,10 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         placeholderTextColor="#000"
@@ -96,7 +103,10 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Admin Code"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={adminCode}
         onChangeText={setAdminCode}
         placeholderTextColor="#000"
@@ -105,7 +115,10 @@ export default function AdminSignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Admin Pass"
-        secureTextEntry
+        secureTextEntry={true}
+        selectionColor="#000"
+        autoCorrect={false}
+        autoCapitalize="none"
         value={adminPass}
         onChangeText={setAdminPass}
         placeholderTextColor="#000"
@@ -142,7 +155,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     fontSize: 16,
-    color: "#333",
+    color: "#161414",
   },
   button: {
     backgroundColor: "#2a2a72",

@@ -9,7 +9,7 @@ export default function SupportScreen() {
   };
 
   const handleEmail = () => {
-    Linking.openURL("mailto:support@zamrent.com"); // not real email big man
+    Linking.openURL("mailto:support@zamrent.com"); 
   };
 
   const handleWhatsApp = () => {

@@ -169,7 +169,7 @@ useFocusEffect(
         propertyType={propertyType}
       />
 
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 , paddingTop: 20}}>
         <View style={styles.inner}>
           {/* Top Section */}
           <View style={styles.topsection}>

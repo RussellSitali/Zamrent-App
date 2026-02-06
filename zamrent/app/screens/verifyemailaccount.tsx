@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: "center",
     backgroundColor: "#fff",
+    paddingTop: 20,
   },
   heading: {
     fontSize: 26,

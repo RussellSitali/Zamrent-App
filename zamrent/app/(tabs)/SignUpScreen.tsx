@@ -25,8 +25,7 @@ export default function Signup() {
   });
 
   const [message, setMessage] = useState("");
-  const [show1, setShow1] = useState(true);
-  const [show2, setShow2] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (fieldName, value) => {
     setFormData((prevData) => ({
@@ -35,10 +34,10 @@ export default function Signup() {
     }));
   };
 
-  const showpassword1 = () => setShow1(!show1);
-  const showpassword2 = () => setShow2(!show2);
 
   const submit = async () => {
+    setLoading(true);
+
     try {
       const res = await fetch(`${baseURL}/api/createAccount`, {
         method: "POST",
@@ -49,6 +48,7 @@ export default function Signup() {
       });
 
       const data = await res.json();
+      setLoading(false);
 
       if (!res.ok) {
       // backend returned an error
@@ -130,35 +130,43 @@ export default function Signup() {
 
           <View style={styles.passwordRow}>
             <TextInput
-              style={[styles.input, { flex: 1 }]}
-              secureTextEntry={show1}
+              style={[styles.input, { flex: 1 , color: "#000"}]}
+              secureTextEntry={true}
+              selectionColor="#000"
+              autoCorrect={false}
+              autoCapitalize="none"
               placeholderTextColor="#000"
               placeholder="Password"
               value={formData.password}
               onChangeText={(value) => handleChange("password", value)}
             />
-            <TouchableOpacity onPress={showpassword1}>
-              <Text style={styles.eyeIcon}>{show1 ? "👁️" : "🔒"}</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.passwordRow}>
             <TextInput
-              style={[styles.input, { flex: 1 }]}
-              secureTextEntry={show2}
+              style={[styles.input, { flex: 1, color: "#000" }]}
+              secureTextEntry={true}
+              selectionColor="#000"
+              autoCorrect={false}
+              autoCapitalize="none"
               placeholderTextColor="#000"
               placeholder="Confirm Password"
               value={formData.confirmpassword}
               onChangeText={(value) => handleChange("confirmpassword", value)}
             />
-            <TouchableOpacity onPress={showpassword2}>
-              <Text style={styles.eyeIcon}>{show2 ? "👁️" : "🔒"}</Text>
-            </TouchableOpacity>
           </View>
 
+          {loading?(
+          <TouchableOpacity style={styles.submitBtn} onPress={submit}>
+            <Text style={styles.submitText}>Creating account...</Text>
+          </TouchableOpacity>
+          ):(
           <TouchableOpacity style={styles.submitBtn} onPress={submit}>
             <Text style={styles.submitText}>Sign Up</Text>
           </TouchableOpacity>
+          )}
+
+     
 
           {message ? (
             <View style={styles.messageBox}>
@@ -185,6 +193,7 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+    paddingTop: 20,
   },
   header: {
     marginTop: 40,

@@ -21,13 +21,10 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const [show, setShow] = useState(true);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const change = () => {
-    setShow(!show);
-  };
 
   const resetpassword = () => {
     router.push("/screens/resetpassword");
@@ -95,16 +92,16 @@ export default function Login() {
 
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[styles.input, { flex: 1 }]}
-                  placeholderTextColor="#000"
+                  style={[styles.input, { flex: 1 , color: "#000"}]}
                   placeholder="Password"
-                  secureTextEntry={show}
+                  placeholderTextColor="#000"
+                  secureTextEntry={true}
+                  selectionColor="#000"
+                  autoCorrect={false}
+                  autoCapitalize="none"
                   value={formData.password}
                   onChangeText={(value) => handleChange("password", value)}
                 />
-                <TouchableOpacity onPress={change} style={styles.eyeIcon}>
-                  <Text style={{ fontSize: 18 }}>{show ? "👁️" : "🔒"}</Text>
-                </TouchableOpacity>
               </View>
 
               <TouchableOpacity
@@ -139,6 +136,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#f9f9f9",
+    paddingTop: 20,
   },
   main: {
     flex: 1,

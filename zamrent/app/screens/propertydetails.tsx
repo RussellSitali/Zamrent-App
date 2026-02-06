@@ -35,7 +35,7 @@ export default function PropertyDetailsScreen() {
   };
   
 return (
-  <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
+  <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5", paddingTop: 20, }}>
     {/* Sticky Header */}
     <View style={styles.header}>
       <TouchableOpacity onPress={() => router.back()}>

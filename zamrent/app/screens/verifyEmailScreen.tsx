@@ -34,7 +34,7 @@ export default function VerifyEmailScreen() {
   }, [token]);
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" , paddingTop: 20}}>
       <ActivityIndicator size="large" />
       <Text style={{ marginTop: 10 }}>Verifying your email...</Text>
     </View>

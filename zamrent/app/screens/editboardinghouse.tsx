@@ -115,8 +115,8 @@ export default function EditBoardingHouse() {
 
     if (!result.canceled) {
       const picked = result.assets;
-      if (picked.length > 7) {
-        alert("Upload upto 7 maximum images");
+      if (picked.length > 9) {
+        alert("Upload upto 9 maximum images");
         return;
       }
       setNewImages(picked);
@@ -139,16 +139,11 @@ export default function EditBoardingHouse() {
         return;
       }
 
-      const payload = {
-        ...form,
-        price: Number(form.price),
-        bed_spaces: Number(form.bedspaces),
-        bathrooms: Number(form.bathrooms),
-      };
-
       // If new images were selected, upload them first
 
         const uploadedImages = [];
+
+        const images = [...newImages];
 
         for (const img of images) {
           // ✅ Already uploaded image (Cloudinary)
@@ -201,6 +196,13 @@ export default function EditBoardingHouse() {
           });
         }
 
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        bed_spaces: Number(form.bedspaces),
+        bathrooms: Number(form.bathrooms),
+        images: uploadedImages,
+      };
 
       // Update listing in backend
       const res = await axios.patch(

@@ -174,15 +174,34 @@ export default function Profile() {
         </ScrollView>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.listPrice}>Title: {item.title}</Text>
-          <Text style={styles.listPrice}>Description: {item.description}</Text>
-          <Text style={styles.listPrice}>Location: {item.location}</Text>
-          <Text style={styles.listPrice}>Price: K{item.price}</Text>
+                <Text style={styles.itemTitle}>{item.title}</Text>
 
-          <Text style={{fontSize:19}}>Rental Status: </Text>
-          <Text style={{ color: rentStatus === "Available" ? "green" : "red", fontWeight: "bold", marginTop:1 , fontSize:19}}>
-            {rentStatus}
-          </Text>
+                <Text style={styles.itemText}>
+                  📝 <Text style={styles.label}>Description:</Text> {item.description}
+                </Text>
+
+                <Text style={styles.itemText}>
+                  📍 <Text style={styles.label}>Location:</Text> {item.location}
+                </Text>
+
+                <Text style={styles.priceText}>
+                  💰 K{item.price}
+                </Text>
+
+                <Text style={styles.itemText}>
+                  🛏️ <Text style={styles.label}>Rooms:</Text> {item.bedrooms}
+                </Text>
+
+                <Text style={styles.statusLabel}>Rental Status</Text>
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: rentStatus === "Available" ? "#2e7d32" : "#c62828" },
+                  ]}
+                >
+                  {rentStatus}
+        </Text>
+
 
         <TouchableOpacity onPress={() => changeStatus(item.id, item.status)} style={{marginTop:5, marginBottom:5}}>
           <Text style={{ color:"blue", fontSize:16,}}>
@@ -231,7 +250,7 @@ export default function Profile() {
               <Text
               style={{
                 marginTop: 10,
-                fontSize: 14,
+                fontSize: 20,
                 color: "#555",
                 textAlign: "center",
               }}
@@ -273,21 +292,43 @@ export default function Profile() {
         </ScrollView>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.listPrice}>Title: {item.title}</Text>
-          <Text style={styles.listPrice}>Description: {item.description}</Text>
-          <Text style={styles.listPrice}>Location: {item.location}</Text>
-           <Text style={styles.listPrice}>Price: K{item.price}</Text>
-          <Text style={styles.listPrice}>Total bedspaces{item.bed_spaces}</Text>
+            <Text style={styles.itemTitle}>{item.title}</Text>
 
-          <Text style={{ color: availableBeds > 0 ? "green" : "red", fontWeight: "bold", marginTop:5 }}>
-            {availableBeds} Bedspaces available
-          </Text>
+            <Text style={styles.itemText}>
+              📝 <Text style={styles.label}>Description:</Text> {item.description}
+            </Text>
+
+            <Text style={styles.itemText}>
+              📍 <Text style={styles.label}>Location:</Text> {item.location}
+            </Text>
+
+            <Text style={styles.priceText}>
+              💰 K{item.price}
+            </Text>
+
+            <Text style={styles.itemText}>
+              🛏️ <Text style={styles.label}>Total bedspaces:</Text> {item.bed_spaces}
+            </Text>
+
+            <Text
+              style={[
+                styles.statusText,
+                {
+                  color: availableBeds > 0 ? "#2e7d32" : "#c62828",
+                  marginTop: 6,
+                },
+              ]}
+            >
+              {availableBeds > 0 ? "🟢" : "🔴"} {availableBeds} Bedspaces available
+        </Text>
+
 
           {/* Input to change bed spaces */}
           <View style={{ flexDirection:"row", marginTop:5, alignItems:"center" }}>
             <TextInput
-              style={{ borderWidth:1, borderColor:"gray", padding:5, width:60, marginRight:10 }}
+              style={{ borderWidth:1, borderColor:"gray", padding:5, width:60, marginRight:10, color:"#000" }}
               keyboardType="number-pad"
+              selectionColor="#000"
               placeholder={`${availableBeds}`}
               value={bedInput[item.id]?.toString() || ""}
               onChangeText={val => setBedInput({...bedInput, [item.id]: val})}
@@ -431,7 +472,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: 30,
     backgroundColor: "#f5f5f5",
   },
   header: {
@@ -526,4 +567,42 @@ buttonText: {
   color: "white",
   fontWeight: "600",
 },
+itemTitle: {
+  fontSize: 22,
+  fontWeight: "700",
+  marginBottom: 6,
+  color: "#111",
+},
+
+itemText: {
+  fontSize: 16,
+  marginTop: 4,
+  color: "#333",
+  lineHeight: 22,
+},
+
+label: {
+  fontWeight: "600",
+  color: "#555",
+},
+
+priceText: {
+  fontSize: 20,
+  fontWeight: "700",
+  marginTop: 8,
+  color: "#1b5e20",
+},
+
+statusLabel: {
+  marginTop: 10,
+  fontSize: 20,
+  color: "#666",
+},
+
+statusText: {
+  fontSize: 18,
+  fontWeight: "700",
+  marginTop: 2,
+},
+
 });

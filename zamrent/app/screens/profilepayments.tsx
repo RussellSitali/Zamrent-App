@@ -120,9 +120,9 @@ export default function Profile() {
           <TouchableOpacity style={styles.button} onPress={handleVerify}>
             <Text style={styles.buttonText}>Verify Account</Text>
           </TouchableOpacity>
-           <TouchableOpacity style={styles.button} onPress={handleDelete}>
+           {/* <TouchableOpacity style={styles.button} onPress={handleDelete}>
             <Text style={styles.buttonText}>Delete Account</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Logout */}
