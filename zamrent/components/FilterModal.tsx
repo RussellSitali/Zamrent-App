@@ -1,6 +1,7 @@
-
 import React from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import RadioButtons from "./RadioButtons"; 
+import { Button } from "react-native-paper";
 
 export default function FilterModal({
   visible,
@@ -12,6 +13,10 @@ export default function FilterModal({
   bedspaces,
   setBedspaces,
   propertyType,
+  setPropertyType,
+  filter,
+  setFilter,
+  handleReset,
 }) {
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
@@ -19,6 +24,7 @@ export default function FilterModal({
         <View style={styles.container}>
           <Text style={styles.title}>Filter Options</Text>
 
+          {/* Price */}
           <TextInput
             placeholder="Max Price"
             placeholderTextColor="#000"
@@ -28,6 +34,7 @@ export default function FilterModal({
             style={styles.input}
           />
 
+          {/* Rooms / Bedspaces */}
           {propertyType === "house" && (
             <TextInput
               placeholder="Rooms"
@@ -50,6 +57,33 @@ export default function FilterModal({
             />
           )}
 
+          {/* Property Type Selector */}
+          <Text style={{ marginTop: 10, fontSize: 16, fontWeight: "bold" }}>
+            Property Type
+          </Text>
+          <RadioButtons propertyType={propertyType} setPropertyType={setPropertyType} />
+
+          {/* Near Me + Reset */}
+         <View style={{ flexDirection: "row", justifyContent:"space-between", marginTop:15 }}>
+            <Button
+              mode="contained-tonal"
+              onPress={() => setFilter("near-me")}
+              style={{ width:"100" }}
+            >
+              Near Me
+            </Button>
+
+            <Button
+              mode="outlined"
+              onPress={handleReset}
+              style={{ width:"50%" }}
+            >
+              Reset
+            </Button>
+          </View>
+
+
+          {/* Apply Button */}
           <TouchableOpacity style={styles.button} onPress={onClose}>
             <Text style={styles.buttonText}>Apply Filters</Text>
           </TouchableOpacity>

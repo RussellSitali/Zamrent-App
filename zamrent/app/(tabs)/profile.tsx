@@ -33,7 +33,7 @@ export default function Profile() {
   const getVerificationStage = (status?: string) => {
   switch (status) {
     case "pending":
-      return { label: "Pending Verification", color: "#3498db" };
+      return { label: "Pending Verification...", color: "#3498db" };
     case "approved":
       return { label: "Property Verified ☑️", color: "#2ecc71" };
     case "rejected":
@@ -329,6 +329,7 @@ export default function Profile() {
               style={{ borderWidth:1, borderColor:"gray", padding:5, width:60, marginRight:10, color:"#000" }}
               keyboardType="number-pad"
               selectionColor="#000"
+              placeholderTextColor="#000"
               placeholder={`${availableBeds}`}
               value={bedInput[item.id]?.toString() || ""}
               onChangeText={val => setBedInput({...bedInput, [item.id]: val})}
@@ -416,23 +417,29 @@ export default function Profile() {
   }
 
   const EmptyState = ({ type }) => (
-    <View style={styles.emptyContainer}>
-      <MaterialCommunityIcons
-        name={type === "house" ? "home-off" : "home-city-outline"}
-        size={60} color="gray"
-      />
-      <Text style={styles.emptyText}>
-        {type === "house" ? "No houses listed yet" : "No boarding houses listed yet"}
-      </Text>
-      <TouchableOpacity
-        style={styles.addListingButton}
-        onPress={() => router.push("/screens/addlisting")}
-      >
-        <Text style={styles.addListingButtonText}>
-          {type === "house" ? "Add your first house" : "Add your first boarding house"}
+      <View style={styles.emptyContainer}>
+        <MaterialCommunityIcons
+          name={type === "house" ? "home-off" : "home-city-outline"}
+          size={60}
+          color="gray"
+        />
+        <Text style={styles.emptyText}>
+          {type === "house" ? "No houses listed yet" : "No boarding houses listed yet"}
         </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.addListingButton}
+          onPress={() =>
+            router.push({
+              pathname: "/screens/addlisting",
+              params: { type: type } 
+            })
+          }
+        >
+          <Text style={styles.addListingButtonText}>
+            {type === "house" ? "Add your first house" : "Add your first boarding house"}
+          </Text>
+        </TouchableOpacity>
+      </View>
   );
 
   return (

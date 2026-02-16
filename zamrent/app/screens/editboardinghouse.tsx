@@ -206,7 +206,7 @@ export default function EditBoardingHouse() {
 
       // Update listing in backend
       const res = await axios.patch(
-        `http://localhost:5000/api/property/updateboardinghouse/${propertyId}`,
+        `${baseURL}/api/property/updateboardinghouse/${propertyId}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

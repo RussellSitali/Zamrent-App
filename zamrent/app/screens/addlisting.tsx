@@ -16,12 +16,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomDrawer from "../../components/drawer";
 import { Platform } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 export default function AddListing() {
+  const { type } = useLocalSearchParams(); 
+  
+
   const router = useRouter();
   const baseURL = process.env.EXPO_PUBLIC_API_URL
 
-  const [listingType, setListingType] = useState("house");
+  const [listingType, setListingType] = useState(type || "house")
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");

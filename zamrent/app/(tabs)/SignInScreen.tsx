@@ -78,7 +78,7 @@ export default function Login() {
           style={{ flex: 1 }}
         >
           <View style={styles.main}>
-            <Text style={styles.header}>ZamRent24</Text>
+            <Text style={styles.header}>ZamRent</Text>
 
             <View style={styles.formContainer}>
               <TextInput
