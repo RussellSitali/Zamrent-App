@@ -115,8 +115,6 @@ export default function LandlordView({ user }) {
     }, [])
   );
 
-  // --- RENDER FUNCTIONS RETAINED EXACTLY AS PROVIDED ---
-
   const renderHouses = ({ item }) => {
     const fallbackImage = "https://placehold.co/600x400?text=No+House+Image";
     const imagesToShow = item.images && item.images.length > 0 ? item.images : [fallbackImage];
@@ -186,6 +184,7 @@ export default function LandlordView({ user }) {
           <View style={{ flexDirection: "row", marginTop: 5, alignItems: "center" }}>
             <TextInput
               style={styles.bedInput}
+              placeholderTextColor="#000"
               keyboardType="number-pad"
               placeholder={`${availableBeds}`}
               value={bedInput[item.id]?.toString() || ""}
