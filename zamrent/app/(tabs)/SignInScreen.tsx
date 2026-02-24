@@ -48,18 +48,20 @@ export default function Login() {
       });
 
       const data = await res.json();
-
+      
       if (res.ok) {
         if (data.token && data.user) {
           await AsyncStorage.setItem("userToken", data.token);
-          await AsyncStorage.setItem("userInfo", JSON.stringify(data.user));
-          router.replace("/(tabs)/Profile");
+          await AsyncStorage.setItem(
+            "userInfo",
+            JSON.stringify({ ...data.user, role: data.role })
+          );
+          
+            router.replace("/(tabs)/Profile"); 
         }
-      } else {
-        await AsyncStorage.removeItem("userToken");
-        await AsyncStorage.removeItem("userInfo");
-        setMessage(data.message || "Login failed");
       }
+      console.log("The data we have (Sign in)", data);
+
     } catch (error) {
       console.error("This is the error:", error);
       setMessage("Something went wrong. Try again later.");

@@ -7,10 +7,12 @@ import {
   View,
   Text,
   TextInput,
+  ScrollView,
   Platform,
+  ActivityIndicator
 } from "react-native";
 
-import { router } from 'expo-router';
+import { router } from "expo-router";
 
 export default function Signup() {
   const baseURL = process.env.EXPO_PUBLIC_API_URL;
@@ -22,6 +24,8 @@ export default function Signup() {
     email: "",
     password: "",
     confirmpassword: "",
+    usertype: "landlord",
+    preferred_location: "",
   });
 
   const [message, setMessage] = useState("");
@@ -34,28 +38,26 @@ export default function Signup() {
     }));
   };
 
-
   const submit = async () => {
     setLoading(true);
+    setMessage("");
 
     try {
       const res = await fetch(`${baseURL}/api/createAccount`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...formData, usertype: "landlord" }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
       setLoading(false);
 
       if (!res.ok) {
-      // backend returned an error
-      setMessage(data.message || "Signup failed. Please try again.");
-      return; 
-    }
+        setMessage(data.message || "Signup failed. Please try again.");
+        return;
+      }
 
+      // Clear form
       setFormData({
         firstname: "",
         lastname: "",
@@ -63,20 +65,21 @@ export default function Signup() {
         email: "",
         password: "",
         confirmpassword: "",
+        usertype: "landlord",
+        preferred_location: "",
       });
 
       setMessage(data.message);
 
-      // after successful signup
+      // Redirect to email verification
       router.push({
-        pathname: '/screens/verifyemailaccount',
-        params: {
-          email: formData.email,
-        },
+        pathname: "/screens/verifyemailaccount",
+        params: { email: formData.email, usertype: formData.usertype },
       });
-
     } catch (error) {
       console.error(error);
+      setLoading(false);
+      setMessage("Something went wrong. Try again.");
     }
   };
 
@@ -86,130 +89,167 @@ export default function Signup() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Create Your Account</Text>
-          <Text style={styles.headerSubtitle}>
-            List your property and find tenants faster with Zamrent
-          </Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Create Your Account</Text>
+            <Text style={styles.headerSubtitle}>
+              List your property or find tenants faster with Zamrent
+            </Text>
+          </View>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="#000"
-            placeholder="First Name"
-            value={formData.firstname}
-            onChangeText={(value) => handleChange("firstname", value)}
-          />
+          <View style={styles.roleToggle}>
+            <TouchableOpacity
+              style={[
+                styles.roleBtn,
+                formData.usertype === "tenant" && styles.selectedRole,
+              ]}
+              onPress={() => handleChange("usertype", "tenant")}
+            >
+              <Text
+                style={[
+                  styles.roleText,
+                  formData.usertype === "tenant" && styles.selectedRoleText,
+                ]}
+              >
+                Tenant
+              </Text>
+            </TouchableOpacity>
 
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="#000"
-            placeholder="Last Name"
-            value={formData.lastname}
-            onChangeText={(value) => handleChange("lastname", value)}
-          />
+            <TouchableOpacity
+              style={[
+                styles.roleBtn,
+                formData.usertype === "landlord" && styles.selectedRole,
+              ]}
+              onPress={() => handleChange("usertype", "landlord")}
+            >
+              <Text
+                style={[
+                  styles.roleText,
+                  formData.usertype === "landlord" && styles.selectedRoleText,
+                ]}
+              >
+                Landlord
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholderTextColor="#000"
-            placeholder="Phone Number"
-            value={formData.phonenumber}
-            onChangeText={(value) => handleChange("phonenumber", value)}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholderTextColor="#000"
-            placeholder="Email Address"
-            keyboardType="email-address"
-            value={formData.email}
-            onChangeText={(value) => handleChange("email", value)}
-          />
-
-          <View style={styles.passwordRow}>
+          <View style={styles.form}>
             <TextInput
-              style={[styles.input, { flex: 1 , color: "#000"}]}
-              secureTextEntry={true}
-              selectionColor="#000"
-              autoCorrect={false}
-              autoCapitalize="none"
-              placeholderTextColor="#000"
+              style={styles.input}
+              placeholder="First Name"
+              placeholderTextColor="#888"
+              value={formData.firstname}
+              onChangeText={(value) => handleChange("firstname", value)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              placeholderTextColor="#888"
+              value={formData.lastname}
+              onChangeText={(value) => handleChange("lastname", value)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              placeholderTextColor="#888"
+              keyboardType="numeric"
+              value={formData.phonenumber}
+              onChangeText={(value) => handleChange("phonenumber", value)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              placeholderTextColor="#888"
+              keyboardType="email-address"
+              value={formData.email}
+              onChangeText={(value) => handleChange("email", value)}
+            />
+
+            <TextInput
+              style={styles.input}
               placeholder="Password"
+              placeholderTextColor="#888"
+              secureTextEntry
               value={formData.password}
               onChangeText={(value) => handleChange("password", value)}
             />
-          </View>
 
-          <View style={styles.passwordRow}>
             <TextInput
-              style={[styles.input, { flex: 1, color: "#000" }]}
-              secureTextEntry={true}
-              selectionColor="#000"
-              autoCorrect={false}
-              autoCapitalize="none"
-              placeholderTextColor="#000"
+              style={styles.input}
               placeholder="Confirm Password"
+              placeholderTextColor="#888"
+              secureTextEntry
               value={formData.confirmpassword}
               onChangeText={(value) => handleChange("confirmpassword", value)}
             />
-          </View>
 
-          {loading?(
-          <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-            <Text style={styles.submitText}>Creating account...</Text>
-          </TouchableOpacity>
-          ):(
-          <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-            <Text style={styles.submitText}>Sign Up</Text>
-          </TouchableOpacity>
-          )}
+            {/* Tenant-specific fields */}
+            {formData.usertype === "tenant" && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Preferred Location"
+                  placeholderTextColor="#888"
+                  value={formData.preferred_location}
+                  onChangeText={(value) => handleChange("preferred_location", value)}
+                />
+              </>
+            )}
 
-     
-
-          {message ? (
-            <View style={styles.messageBox}>
+            {message ? (
               <Text
                 style={{
-                  color: message.toLowerCase().includes("success")
-                    ? "green"
-                    : "red",
-                  fontSize: 16,
+                  color: message.toLowerCase().includes("success") ? "green" : "red",
                   textAlign: "center",
+                  marginVertical: 10,
+                  fontSize: 16,
                 }}
               >
                 {message}
               </Text>
-            </View>
-          ) : null}
-        </View>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.submitBtn}
+              onPress={submit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>Sign Up</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  main: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    paddingTop: 20,
-  },
-  header: {
-    marginTop: 40,
-    marginBottom: 20,
+  main: { flex: 1, backgroundColor: "#f5f5f5" },
+  header: { marginTop: 40, marginBottom: 20, paddingHorizontal: 20 },
+  headerTitle: { fontSize: 32, fontWeight: "700", color: "#222", marginBottom: 5 },
+  headerSubtitle: { fontSize: 16, color: "#555" },
+  roleToggle: { flexDirection: "row", justifyContent: "center", marginBottom: 20 },
+  roleBtn: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingVertical: 10,
     paddingHorizontal: 20,
+    marginHorizontal: 5,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#222",
-    marginBottom: 5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: "#555",
-  },
+  selectedRole: { backgroundColor: "#2f95dc", borderColor: "#2f95dc" },
+  roleText: { color: "#000", fontSize: 16 },
+  selectedRoleText: { color: "#fff", fontWeight: "600" },
   form: {
     backgroundColor: "white",
     marginHorizontal: 20,
@@ -231,15 +271,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: "#fafafa",
   },
-  passwordRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  eyeIcon: {
-    fontSize: 20,
-    marginLeft: 10,
-  },
   submitBtn: {
     backgroundColor: "#2f95dc",
     paddingVertical: 14,
@@ -247,12 +278,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  submitText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  messageBox: {
-    marginTop: 20,
-  },
+  submitText: { color: "white", fontSize: 18, fontWeight: "600" },
 });
